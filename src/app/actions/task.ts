@@ -27,6 +27,8 @@ export async function createTaskAction(campaignId: string, _prev: ActionState, f
     const dueDateRaw = formData.get("dueDate");
     const dependsOn = formData.get("dependsOn") ? String(formData.get("dependsOn")) : null;
 
+    const priorityRaw = formData.get("priority") ? String(formData.get("priority")) : null;
+
     const task = await taskService.createTask({
       campaignId,
       name,
@@ -34,6 +36,7 @@ export async function createTaskAction(campaignId: string, _prev: ActionState, f
       ownerId: formData.get("ownerId") ? String(formData.get("ownerId")) : user.id,
       approverId: formData.get("approverId") ? String(formData.get("approverId")) : null,
       dueDate: dueDateRaw ? new Date(String(dueDateRaw)) : null,
+      priority: (priorityRaw as "LOW" | "MEDIUM" | "HIGH" | "URGENT" | null) || null,
       createdBy: user.id,
     });
 
@@ -52,12 +55,15 @@ export async function createTaskAction(campaignId: string, _prev: ActionState, f
 export async function updateTaskAction(taskId: string, campaignId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser();
   try {
+    const priorityRaw = formData.get("priority") ? String(formData.get("priority")) : null;
+
     await taskService.updateTask(taskId, user.id, {
       name: formData.get("name") ? String(formData.get("name")) : undefined,
       teamId: formData.get("teamId") ? String(formData.get("teamId")) : null,
       ownerId: formData.get("ownerId") ? String(formData.get("ownerId")) : null,
       approverId: formData.get("approverId") ? String(formData.get("approverId")) : null,
       dueDate: formData.get("dueDate") ? new Date(String(formData.get("dueDate"))) : null,
+      priority: (priorityRaw as "LOW" | "MEDIUM" | "HIGH" | "URGENT" | null) || null,
     });
   } catch (err) {
     if (err instanceof Error) return { error: err.message };

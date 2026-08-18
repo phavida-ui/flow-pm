@@ -4,16 +4,18 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { PriorityBadge } from "@/components/priority-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { deleteTaskAction } from "@/app/actions/task";
 import { formatDue } from "@/lib/format";
-import type { TaskStatus } from "@prisma/client";
+import type { TaskStatus, TaskPriority } from "@prisma/client";
 
 type Option = { id: string; name: string };
 type Row = {
   id: string;
   name: string;
   status: TaskStatus;
+  priority: TaskPriority | null;
   dueDate: Date | null;
   team: { id: string; name: string } | null;
   owner: { id: string; name: string } | null;
@@ -109,6 +111,7 @@ export function PlanningBoard({
               <th className="px-4 py-3">ผู้อนุมัติ</th>
               <th className="px-4 py-3">กำหนดส่ง</th>
               <th className="px-4 py-3">ขึ้นอยู่กับ</th>
+              <th className="px-4 py-3">ความสำคัญ</th>
               <th className="px-4 py-3">สถานะ</th>
               <th className="px-4 py-3" />
             </tr>
@@ -129,6 +132,9 @@ export function PlanningBoard({
                   {t.dependsOn.length ? t.dependsOn.map((d) => d.dependsOnTask.name).join(", ") : "—"}
                 </td>
                 <td className="px-4 py-3">
+                  <PriorityBadge priority={t.priority} />
+                </td>
+                <td className="px-4 py-3">
                   <StatusBadge status={t.status} />
                 </td>
                 <td className="px-4 py-3">
@@ -147,6 +153,7 @@ export function PlanningBoard({
                           ownerId: t.owner?.id ?? null,
                           approverId: t.approver?.id ?? null,
                           dueDate: t.dueDate,
+                          priority: t.priority,
                         }}
                       />
                       <form action={deleteTaskAction.bind(null, t.id, campaignId)}>
@@ -161,7 +168,7 @@ export function PlanningBoard({
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-muted">
+                <td colSpan={9} className="px-4 py-10 text-center text-muted">
                   ไม่มีงานที่ตรงกับตัวกรองนี้
                 </td>
               </tr>

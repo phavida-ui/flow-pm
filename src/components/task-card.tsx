@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { clsx } from "clsx";
 import { StatusBadge, isOverdue } from "@/components/status-badge";
+import { PriorityBadge } from "@/components/priority-badge";
 import { formatDue } from "@/lib/format";
-import type { TaskStatus } from "@prisma/client";
+import type { TaskStatus, TaskPriority } from "@prisma/client";
 
 type Dependent = {
   task: { id: string; name: string; status: TaskStatus; ownerId: string | null; owner: { name: string } | null };
@@ -15,6 +16,7 @@ export function TaskCard({
     id: string;
     name: string;
     status: TaskStatus;
+    priority?: TaskPriority | null;
     dueDate: Date | null;
     campaign: { id: string; name: string };
     dependents: Dependent[];
@@ -46,7 +48,10 @@ export function TaskCard({
           </div>
         )}
       </div>
-      <StatusBadge status={task.status} />
+      <div className="flex flex-col items-end gap-1.5">
+        <StatusBadge status={task.status} />
+        {task.priority && <PriorityBadge priority={task.priority} />}
+      </div>
     </Link>
   );
 }

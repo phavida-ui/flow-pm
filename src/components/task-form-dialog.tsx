@@ -28,6 +28,7 @@ export function TaskFormDialog({
     ownerId: string | null;
     approverId: string | null;
     dueDate: Date | null;
+    priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | null;
   };
   lockOwnerTo?: { id: string; name: string };
 }) {
@@ -125,6 +126,17 @@ export function TaskFormDialog({
             </select>
           </label>
         </div>
+
+        <label className="grid gap-1.5">
+          <span className="text-[10px] font-extrabold text-[#59677a]">ความสำคัญ</span>
+          <select name="priority" defaultValue={task?.priority ?? ""} className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]">
+            <option value="">ไม่ระบุ</option>
+            <option value="LOW">ต่ำ</option>
+            <option value="MEDIUM">ปานกลาง</option>
+            <option value="HIGH">สูง</option>
+            <option value="URGENT">ด่วน</option>
+          </select>
+        </label>
 
         {mode === "create" && (
           <label className="grid gap-1.5">

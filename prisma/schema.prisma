@@ -56,6 +56,11 @@ enum ApprovalStatus {
   REVISION_REQUESTED
 }
 
+enum SubtaskStatus {
+  TODO
+  DONE
+}
+
 enum NotificationType {
   TASK_ASSIGNED
   TASK_READY
@@ -115,6 +120,8 @@ model User {
   createdTemplates               WorkflowTemplate[]
   defaultOwnerOfTemplateTasks    WorkflowTemplateTask[] @relation("TemplateTaskDefaultOwner")
   defaultApproverOfTemplateTasks WorkflowTemplateTask[] @relation("TemplateTaskDefaultApprover")
+  assignedSubtasks                Subtask[]              @relation("SubtaskAssignee")
+  createdSubtasks                 Subtask[]              @relation("SubtaskCreatedBy")
 
   @@index([teamId])
 }
@@ -259,10 +266,31 @@ model Task {
   activityLogs  ActivityLog[]
   comments      Comment[]
   attachments   Attachment[]
+  subtasks      Subtask[]
 
   @@index([campaignId])
   @@index([ownerId])
   @@index([status])
+}
+
+model Subtask {
+  id          String        @id @default(cuid())
+  taskId      String
+  title       String
+  status      SubtaskStatus @default(TODO)
+  priority    TaskPriority?
+  assigneeId  String?
+  createdBy   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  completedAt DateTime?
+
+  task     Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  assignee User? @relation("SubtaskAssignee", fields: [assigneeId], references: [id])
+  creator  User  @relation("SubtaskCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([taskId])
+  @@index([assigneeId])
 }
 
 model TaskDependency {

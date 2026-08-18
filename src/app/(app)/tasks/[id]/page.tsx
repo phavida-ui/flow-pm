@@ -4,11 +4,14 @@ import { requireUser, isManagerOrAdmin } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
+import { PriorityBadge } from "@/components/priority-badge";
 import { TaskActions } from "@/components/task-actions";
 import { ReassignControls } from "@/components/reassign-controls";
 import { CommentForm } from "@/components/comment-form";
+import { SubtaskList } from "@/components/subtask-list";
 import { formatDue, formatDateTime } from "@/lib/format";
 import { Avatar } from "@/components/avatar";
+import { listSubtasks } from "@/server/services/subtask.service";
 
 export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -30,7 +33,10 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   if (!task) notFound();
 
-  const users = await prisma.user.findMany({ where: { active: true }, select: { id: true, name: true }, orderBy: { name: "asc" } });
+  const [users, subtasks] = await Promise.all([
+    prisma.user.findMany({ where: { active: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    listSubtasks(task.id),
+  ]);
 
   const isOwner = task.ownerId === user.id;
   const isApprover = task.approverId === user.id;
@@ -44,7 +50,10 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
         <div className="grid gap-4">
           <div className="rounded-[17px] border border-line bg-white p-5">
             <div className="mb-4 flex items-center justify-between">
-              <StatusBadge status={task.status} />
+              <div className="flex items-center gap-2">
+                <StatusBadge status={task.status} />
+                <PriorityBadge priority={task.priority} />
+              </div>
               <Link href={`/campaigns/${task.campaign.id}`} className="text-[11px] font-bold text-primary-strong hover:underline">
                 {task.campaign.name}
               </Link>
@@ -94,6 +103,8 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
               {task.approvals[0].comment}
             </div>
           )}
+
+          <SubtaskList taskId={task.id} campaignId={task.campaign.id} subtasks={subtasks} users={users} />
 
           <div className="rounded-[17px] border border-line bg-white p-5">
             <h3 className="mb-3 text-sm font-extrabold">ความคิดเห็น</h3>
