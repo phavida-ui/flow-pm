@@ -11,11 +11,11 @@ export default async function ApprovalsPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Approvals" title={`Approval Inbox — ${inbox.length} Waiting`} />
+      <PageHeader eyebrow="การอนุมัติ" title={`กล่องขออนุมัติ — รอ ${inbox.length} รายการ`} />
 
       {inbox.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-sm text-muted">
-          Nothing is waiting on your approval.
+          ไม่มีรายการรอการอนุมัติจากคุณ
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1">
@@ -29,18 +29,18 @@ export default async function ApprovalsPage() {
               <div className="flex items-center gap-2.5">
                 <Avatar name={t.owner?.name ?? "?"} size={26} />
                 <div className="text-[11px]">
-                  <span className="block text-[9px] text-muted">Submitted by</span>
+                  <span className="block text-[9px] text-muted">ส่งโดย</span>
                   <strong>{t.owner?.name ?? "—"}</strong>
                 </div>
               </div>
 
               <div className="flex justify-between text-[11px]">
                 <div>
-                  <span className="block text-[9px] text-muted">Submitted</span>
+                  <span className="block text-[9px] text-muted">ส่งเมื่อ</span>
                   <strong>{t.submittedAt ? formatDateTime(t.submittedAt) : "—"}</strong>
                 </div>
                 <div className="text-right">
-                  <span className="block text-[9px] text-muted">Due</span>
+                  <span className="block text-[9px] text-muted">กำหนดส่ง</span>
                   <strong>{t.dueDate ? formatDue(t.dueDate) : "—"}</strong>
                 </div>
               </div>
@@ -49,7 +49,7 @@ export default async function ApprovalsPage() {
                 href={`/tasks/${t.id}`}
                 className="inline-flex h-10 items-center justify-center rounded-[11px] bg-primary text-xs font-extrabold text-[#173f5c] hover:bg-primary-strong"
               >
-                Review
+                ตรวจสอบ
               </Link>
             </div>
           ))}

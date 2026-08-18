@@ -25,9 +25,9 @@ export function CampaignCard({ campaign }: { campaign: CampaignCardData }) {
 
       <div>
         <div className="flex justify-between text-[10px] font-bold text-muted">
-          <span>Progress</span>
+          <span>ความคืบหน้า</span>
           <span>
-            {campaign.progress.completed} / {campaign.progress.total} Tasks
+            {campaign.progress.completed} / {campaign.progress.total} งาน
           </span>
         </div>
         <div className="mt-2 h-[7px] overflow-hidden rounded-full bg-[#edf1f4]">
@@ -37,7 +37,7 @@ export function CampaignCard({ campaign }: { campaign: CampaignCardData }) {
 
       <div className="grid grid-cols-2 gap-3 text-[11px]">
         <div>
-          <span className="block text-[9px] font-bold text-muted">Current Holder</span>
+          <span className="block text-[9px] font-bold text-muted">ผู้ถืองานปัจจุบัน</span>
           <strong className="mt-1 block truncate">
             {campaign.currentHolders[0]
               ? `${campaign.currentHolders[0].owner?.name ?? "—"} — ${campaign.currentHolders[0].name}`
@@ -45,7 +45,7 @@ export function CampaignCard({ campaign }: { campaign: CampaignCardData }) {
           </strong>
         </div>
         <div>
-          <span className="block text-[9px] font-bold text-muted">Waiting Approval</span>
+          <span className="block text-[9px] font-bold text-muted">รออนุมัติ</span>
           <strong className="mt-1 block truncate">
             {campaign.waitingApproval[0]
               ? `${campaign.waitingApproval[0].approver?.name ?? "—"} — ${campaign.waitingApproval[0].name}`
@@ -56,11 +56,11 @@ export function CampaignCard({ campaign }: { campaign: CampaignCardData }) {
 
       <div className="flex items-center justify-between border-t border-line pt-3 text-[11px]">
         <div>
-          <span className="block text-[9px] font-bold text-muted">Next</span>
+          <span className="block text-[9px] font-bold text-muted">ถัดไป</span>
           <strong>{campaign.next ? `${campaign.next.owner?.name ?? "—"} — ${campaign.next.name}` : "—"}</strong>
         </div>
         <div className="text-right">
-          <span className="block text-[9px] font-bold text-muted">Target Date</span>
+          <span className="block text-[9px] font-bold text-muted">วันเป้าหมาย</span>
           <strong>{campaign.targetDate ? formatDue(campaign.targetDate) : "—"}</strong>
         </div>
       </div>

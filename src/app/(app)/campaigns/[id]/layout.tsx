@@ -31,7 +31,7 @@ export default async function CampaignLayout({
   return (
     <div>
       <PageHeader
-        eyebrow="Campaign"
+        eyebrow="แคมเปญ"
         title={campaign.name}
         actions={
           canManage && (campaign.status === "PLANNING" || campaign.status === "READY_TO_START") ? (
@@ -39,7 +39,7 @@ export default async function CampaignLayout({
               href={`/campaigns/${campaign.id}/ready-check`}
               className="inline-flex h-10 items-center rounded-[11px] bg-primary px-4 text-xs font-extrabold text-[#173f5c] hover:bg-primary-strong"
             >
-              Ready Check
+              ตรวจความพร้อม
             </Link>
           ) : undefined
         }
@@ -49,12 +49,12 @@ export default async function CampaignLayout({
         <div>
           <div className="mb-2 flex items-center gap-2">
             <CampaignStatusBadge status={campaign.status} />
-            <span className="text-[10px] text-muted">Owner: {campaign.owner.name}</span>
+            <span className="text-[10px] text-muted">เจ้าของ: {campaign.owner.name}</span>
           </div>
           <div className="flex justify-between text-[10px] font-bold text-muted">
-            <span>Progress</span>
+            <span>ความคืบหน้า</span>
             <span>
-              {progress.completed} / {progress.total} Tasks
+              {progress.completed} / {progress.total} งาน
             </span>
           </div>
           <div className="mt-2 h-[7px] overflow-hidden rounded-full bg-[#edf1f4]">
@@ -63,7 +63,7 @@ export default async function CampaignLayout({
         </div>
 
         <div>
-          <span className="block text-[9px] font-bold text-muted">Current Work</span>
+          <span className="block text-[9px] font-bold text-muted">งานปัจจุบัน</span>
           {currentWork.length === 0 ? (
             <span className="mt-1 block text-[11px] text-muted">—</span>
           ) : (
@@ -76,7 +76,7 @@ export default async function CampaignLayout({
         </div>
 
         <div>
-          <span className="block text-[9px] font-bold text-muted">Waiting Approval</span>
+          <span className="block text-[9px] font-bold text-muted">รออนุมัติ</span>
           {waitingApproval.length === 0 ? (
             <span className="mt-1 block text-[11px] text-muted">—</span>
           ) : (
@@ -89,7 +89,7 @@ export default async function CampaignLayout({
         </div>
 
         <div>
-          <span className="block text-[9px] font-bold text-muted">Target Date</span>
+          <span className="block text-[9px] font-bold text-muted">วันเป้าหมาย</span>
           <strong className="mt-1 block text-[11px]">{campaign.targetDate ? formatDue(campaign.targetDate) : "—"}</strong>
         </div>
       </div>

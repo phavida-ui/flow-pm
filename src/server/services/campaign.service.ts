@@ -158,12 +158,12 @@ export async function runReadyCheck(campaignId: string): Promise<ReadyCheckResul
 export async function startCampaign(campaignId: string, actorId: string) {
   const campaign = await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId } });
   if (!["PLANNING", "READY_TO_START"].includes(campaign.status)) {
-    throw new Error(`Campaign cannot be started from status ${campaign.status}`);
+    throw new Error(`ไม่สามารถเริ่มแคมเปญจากสถานะ ${campaign.status} ได้`);
   }
 
   const readyCheck = await runReadyCheck(campaignId);
   if (!readyCheck.passed) {
-    throw new Error("Ready Check failed — resolve the outstanding issues before starting.");
+    throw new Error("ตรวจความพร้อมไม่ผ่าน — กรุณาแก้ไขปัญหาที่เหลือก่อนเริ่มแคมเปญ");
   }
 
   const tasks = await prisma.task.findMany({ where: { campaignId, status: "PLANNED" } });
@@ -188,8 +188,8 @@ export async function startCampaign(campaignId: string, actorId: string) {
           type: "TASK_READY",
           campaignId,
           taskId: task.id,
-          title: "Ready to start",
-          message: `"${task.name}" is ready — you can start now.`,
+          title: "พร้อมเริ่มงาน",
+          message: `"${task.name}" พร้อมแล้ว — เริ่มได้เลยตอนนี้`,
         });
       }
     }
@@ -283,6 +283,6 @@ export async function assertCampaignMember(campaignId: string, userId: string) {
   const member = await prisma.campaignMember.findUnique({
     where: { campaignId_userId: { campaignId, userId } },
   });
-  if (!member) throw new ForbiddenError("You are not a member of this campaign");
+  if (!member) throw new ForbiddenError("คุณไม่ได้เป็นสมาชิกของแคมเปญนี้");
   return member;
 }

@@ -92,8 +92,8 @@ export async function completeTaskCore(tx: Tx, taskId: string, actorId?: string 
         type: "TASK_READY",
         campaignId: task.campaignId,
         taskId: downstreamId,
-        title: "Ready to start",
-        message: `${task.name} was completed. You can start "${downstream.name}" now.`,
+        title: "พร้อมเริ่มงาน",
+        message: `${task.name} เสร็จสิ้นแล้ว คุณสามารถเริ่มงาน "${downstream.name}" ได้ตอนนี้`,
       });
     }
   }
@@ -132,8 +132,8 @@ export async function checkCampaignCompletionCore(tx: Tx, campaignId: string, ac
     userId: campaign.ownerId,
     type: "TASK_READY",
     campaignId,
-    title: "Campaign completed",
-    message: `"${campaign.name}" is complete — all tasks are done.`,
+    title: "แคมเปญเสร็จสิ้น",
+    message: `"${campaign.name}" เสร็จสมบูรณ์แล้ว — งานทั้งหมดเรียบร้อย`,
   });
 }
 

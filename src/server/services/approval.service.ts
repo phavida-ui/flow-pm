@@ -8,7 +8,7 @@ import { notify } from "@/server/services/notification.service";
 
 export async function submitTask(taskId: string, actorId: string) {
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-  if (task.ownerId !== actorId) throw new ForbiddenError("Only the task owner can submit this task");
+  if (task.ownerId !== actorId) throw new ForbiddenError("เฉพาะเจ้าของงานเท่านั้นที่ส่งงานนี้ได้");
 
   if (!task.approverId) {
     // No approver required — submitting completes the task directly.
@@ -44,8 +44,8 @@ export async function submitTask(taskId: string, actorId: string) {
       type: "APPROVAL_REQUIRED",
       campaignId: task.campaignId,
       taskId,
-      title: "Approval requested",
-      message: `"${task.name}" is waiting for your review.`,
+      title: "มีคำขออนุมัติ",
+      message: `"${task.name}" กำลังรอให้คุณตรวจสอบ`,
     });
 
     return updated;
@@ -54,8 +54,8 @@ export async function submitTask(taskId: string, actorId: string) {
 
 export async function approveTask(taskId: string, approverId: string, comment?: string) {
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-  if (task.approverId !== approverId) throw new ForbiddenError("Only the assigned approver can approve this task");
-  if (task.status !== "REVIEW") throw new ForbiddenError("Task is not awaiting review");
+  if (task.approverId !== approverId) throw new ForbiddenError("เฉพาะผู้อนุมัติที่ได้รับมอบหมายเท่านั้นที่อนุมัติงานนี้ได้");
+  if (task.status !== "REVIEW") throw new ForbiddenError("งานนี้ไม่ได้อยู่ในสถานะรอตรวจสอบ");
 
   return prisma.$transaction(async (tx) => {
     const pendingApproval = await tx.approval.findFirst({
@@ -81,11 +81,11 @@ export async function approveTask(taskId: string, approverId: string, comment?: 
 }
 
 export async function requestRevision(taskId: string, approverId: string, comment: string) {
-  if (!comment.trim()) throw new Error("A comment is required when requesting revision");
+  if (!comment.trim()) throw new Error("กรุณากรอกความคิดเห็นเมื่อขอให้แก้ไข");
 
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-  if (task.approverId !== approverId) throw new ForbiddenError("Only the assigned approver can request revision");
-  if (task.status !== "REVIEW") throw new ForbiddenError("Task is not awaiting review");
+  if (task.approverId !== approverId) throw new ForbiddenError("เฉพาะผู้อนุมัติที่ได้รับมอบหมายเท่านั้นที่ขอให้แก้ไขได้");
+  if (task.status !== "REVIEW") throw new ForbiddenError("งานนี้ไม่ได้อยู่ในสถานะรอตรวจสอบ");
 
   assertTransition(task.status, "REVISION");
 
@@ -120,8 +120,8 @@ export async function requestRevision(taskId: string, approverId: string, commen
         type: "REVISION_REQUESTED",
         campaignId: task.campaignId,
         taskId,
-        title: "Revision requested",
-        message: `"${task.name}" needs changes: ${comment}`,
+        title: "มีการขอให้แก้ไข",
+        message: `"${task.name}" ต้องแก้ไข: ${comment}`,
       });
     }
 
@@ -131,7 +131,7 @@ export async function requestRevision(taskId: string, approverId: string, commen
 
 export async function resumeAfterRevision(taskId: string, actorId: string) {
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-  if (task.ownerId !== actorId) throw new ForbiddenError("Only the task owner can resume this task");
+  if (task.ownerId !== actorId) throw new ForbiddenError("เฉพาะเจ้าของงานเท่านั้นที่ดำเนินงานนี้ต่อได้");
   assertTransition(task.status, "IN_PROGRESS");
 
   return prisma.task.update({ where: { id: taskId }, data: { status: "IN_PROGRESS" } });

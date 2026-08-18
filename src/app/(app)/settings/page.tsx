@@ -9,7 +9,7 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Settings" title="Your account" />
+      <PageHeader eyebrow="ตั้งค่า" title="บัญชีของคุณ" />
       <div className="max-w-md rounded-[17px] border border-line bg-white p-6">
         <div className="flex items-center gap-3">
           <Avatar name={user.name} size={44} />
@@ -20,16 +20,16 @@ export default async function SettingsPage() {
         </div>
         <div className="mt-5 grid grid-cols-2 gap-3 text-[11px]">
           <div>
-            <span className="block text-[9px] font-bold text-muted">Role</span>
+            <span className="block text-[9px] font-bold text-muted">บทบาท</span>
             <strong>{user.role}</strong>
           </div>
           <div>
-            <span className="block text-[9px] font-bold text-muted">Team</span>
+            <span className="block text-[9px] font-bold text-muted">ทีม</span>
             <strong>{team?.name ?? "—"}</strong>
           </div>
           <div>
-            <span className="block text-[9px] font-bold text-muted">Can approve tasks</span>
-            <strong>{user.isApprover ? "Yes" : "No"}</strong>
+            <span className="block text-[9px] font-bold text-muted">สามารถอนุมัติงานได้</span>
+            <strong>{user.isApprover ? "ใช่" : "ไม่ใช่"}</strong>
           </div>
         </div>
       </div>

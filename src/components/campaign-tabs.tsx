@@ -8,9 +8,9 @@ export function CampaignTabs({ campaignId }: { campaignId: string }) {
   const pathname = usePathname();
   const base = `/campaigns/${campaignId}`;
   const tabs = [
-    { href: base, label: "Plan" },
-    { href: `${base}/timeline`, label: "Timeline" },
-    { href: `${base}/activity`, label: "Activity" },
+    { href: base, label: "แผนงาน" },
+    { href: `${base}/timeline`, label: "ไทม์ไลน์" },
+    { href: `${base}/activity`, label: "กิจกรรม" },
   ];
 
   return (

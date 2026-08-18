@@ -11,17 +11,17 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
-    return { error: "Enter your email and password." };
+    return { error: "กรุณากรอกอีเมลและรหัสผ่าน" };
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || !user.active) {
-    return { error: "No account found with that email." };
+    return { error: "ไม่พบบัญชีที่ใช้อีเมลนี้" };
   }
 
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) {
-    return { error: "Incorrect password." };
+    return { error: "รหัสผ่านไม่ถูกต้อง" };
   }
 
   await createSessionCookie(user.id);

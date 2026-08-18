@@ -57,12 +57,12 @@ export function PlanningBoard({
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search tasks…"
+            placeholder="ค้นหางาน…"
             className="w-40 text-[11px] outline-none"
           />
         </div>
         <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)} className="h-10 rounded-[11px] border border-line bg-white px-3 text-[11px]">
-          <option value="">All teams</option>
+          <option value="">ทุกทีม</option>
           {teams.map((t) => (
             <option key={t.id} value={t.id}>
               {t.name}
@@ -70,7 +70,7 @@ export function PlanningBoard({
           ))}
         </select>
         <select value={ownerFilter} onChange={(e) => setOwnerFilter(e.target.value)} className="h-10 rounded-[11px] border border-line bg-white px-3 text-[11px]">
-          <option value="">All owners</option>
+          <option value="">ทุกเจ้าของ</option>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
               {u.name}
@@ -103,13 +103,13 @@ export function PlanningBoard({
         <table className="w-full min-w-[900px] border-collapse text-[11px]">
           <thead>
             <tr className="border-b border-line text-left text-[9px] font-extrabold uppercase tracking-wide text-muted">
-              <th className="px-4 py-3">Task</th>
-              <th className="px-4 py-3">Owner</th>
-              <th className="px-4 py-3">Team</th>
-              <th className="px-4 py-3">Approver</th>
-              <th className="px-4 py-3">Due</th>
-              <th className="px-4 py-3">Depends On</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">งาน</th>
+              <th className="px-4 py-3">เจ้าของ</th>
+              <th className="px-4 py-3">ทีม</th>
+              <th className="px-4 py-3">ผู้อนุมัติ</th>
+              <th className="px-4 py-3">กำหนดส่ง</th>
+              <th className="px-4 py-3">ขึ้นอยู่กับ</th>
+              <th className="px-4 py-3">สถานะ</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
@@ -150,7 +150,7 @@ export function PlanningBoard({
                         }}
                       />
                       <form action={deleteTaskAction.bind(null, t.id, campaignId)}>
-                        <button className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft" aria-label="Delete task">
+                        <button className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft" aria-label="ลบงาน">
                           <Trash2 size={13} />
                         </button>
                       </form>
@@ -162,7 +162,7 @@ export function PlanningBoard({
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-10 text-center text-muted">
-                  No tasks match these filters.
+                  ไม่มีงานที่ตรงกับตัวกรองนี้
                 </td>
               </tr>
             )}

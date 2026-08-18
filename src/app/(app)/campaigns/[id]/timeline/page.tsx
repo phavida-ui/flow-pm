@@ -41,7 +41,7 @@ export default async function CampaignTimelinePage({ params }: { params: Promise
   const orderedLevels = [...levels.entries()].sort((a, b) => a[0] - b[0]);
 
   if (tasks.length === 0) {
-    return <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-sm text-muted">No tasks yet.</div>;
+    return <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-sm text-muted">ยังไม่มีงาน</div>;
   }
 
   return (
@@ -71,8 +71,8 @@ export default async function CampaignTimelinePage({ params }: { params: Promise
                     <div>
                       <strong className="text-[12px]">{t.name}</strong>
                       <div className="mt-1 flex gap-2 text-[9px] text-muted">
-                        <span>{t.owner?.name ?? "Unassigned"}</span>
-                        {t.dueDate && <span>Due {formatDue(t.dueDate)}</span>}
+                        <span>{t.owner?.name ?? "ยังไม่มอบหมาย"}</span>
+                        {t.dueDate && <span>กำหนดส่ง {formatDue(t.dueDate)}</span>}
                       </div>
                     </div>
                     <StatusBadge status={t.status} />
@@ -80,7 +80,7 @@ export default async function CampaignTimelinePage({ params }: { params: Promise
                 ))}
                 {levelTasks.length > 1 && (
                   <p className="rounded-[10px] border border-dashed border-[#dfe5eb] bg-[#fafbfc] px-2.5 py-2 text-[9px] text-[#758195]">
-                    These run in parallel.
+                    งานเหล่านี้ทำพร้อมกันได้
                   </p>
                 )}
               </div>

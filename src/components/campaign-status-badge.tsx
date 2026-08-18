@@ -2,12 +2,12 @@ import type { CampaignStatus } from "@prisma/client";
 import { clsx } from "clsx";
 
 const LABELS: Record<CampaignStatus, string> = {
-  DRAFT: "Draft",
-  PLANNING: "Planning",
-  READY_TO_START: "Ready to Start",
-  ACTIVE: "Active",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
+  DRAFT: "ฉบับร่าง",
+  PLANNING: "กำลังวางแผน",
+  READY_TO_START: "พร้อมเริ่ม",
+  ACTIVE: "ดำเนินอยู่",
+  COMPLETED: "เสร็จสิ้น",
+  CANCELLED: "ยกเลิก",
 };
 
 const STYLES: Record<CampaignStatus, string> = {

@@ -6,12 +6,12 @@ import { PageHeader } from "@/components/page-header";
 import { StartCampaignButton } from "@/components/start-campaign-button";
 
 const CHECK_LABELS: Record<string, string> = {
-  hasOwner: "Campaign has an owner",
-  hasTargetDate: "Campaign target date exists",
-  allTasksHaveOwner: "All tasks have owners",
-  allTasksHaveDueDate: "All tasks have due dates",
-  noDependencyCycles: "No dependency cycles detected",
-  atLeastOneStartable: "At least one task can start",
+  hasOwner: "แคมเปญมีเจ้าของ",
+  hasTargetDate: "แคมเปญมีวันเป้าหมาย",
+  allTasksHaveOwner: "งานทุกงานมีเจ้าของ",
+  allTasksHaveDueDate: "งานทุกงานมีกำหนดส่ง",
+  noDependencyCycles: "ไม่พบการพึ่งพากันแบบวนลูป",
+  atLeastOneStartable: "มีอย่างน้อยหนึ่งงานที่เริ่มได้",
 };
 
 export default async function ReadyCheckPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,7 +25,7 @@ export default async function ReadyCheckPage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <PageHeader eyebrow={campaign.name} title="Ready Check" />
+      <PageHeader eyebrow={campaign.name} title="ตรวจความพร้อม" />
 
       <div className="mx-auto max-w-xl rounded-[18px] border border-line bg-white p-6">
         <div className="grid gap-2.5">
@@ -40,15 +40,15 @@ export default async function ReadyCheckPage({ params }: { params: Promise<{ id:
         <div className="my-5 flex justify-center gap-8 text-center">
           <div>
             <div className="text-lg font-extrabold">{result.stats.taskCount}</div>
-            <div className="text-[9px] text-muted">Tasks</div>
+            <div className="text-[9px] text-muted">งาน</div>
           </div>
           <div>
             <div className="text-lg font-extrabold">{result.stats.peopleCount}</div>
-            <div className="text-[9px] text-muted">People</div>
+            <div className="text-[9px] text-muted">คน</div>
           </div>
           <div>
             <div className="text-lg font-extrabold">{result.stats.teamCount}</div>
-            <div className="text-[9px] text-muted">Teams</div>
+            <div className="text-[9px] text-muted">ทีม</div>
           </div>
         </div>
 

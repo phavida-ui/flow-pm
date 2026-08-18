@@ -1,10 +1,10 @@
-const DUE_FORMATTER = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-const TIME_FORMATTER = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" });
+const DUE_FORMATTER = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short" });
+const TIME_FORMATTER = new Intl.DateTimeFormat("th-TH", { hour: "2-digit", minute: "2-digit" });
 
 export function formatDue(date: Date) {
   const today = new Date();
   const isToday = date.toDateString() === today.toDateString();
-  if (isToday) return "Today";
+  if (isToday) return "วันนี้";
   return DUE_FORMATTER.format(date);
 }
 

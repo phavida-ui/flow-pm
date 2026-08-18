@@ -34,15 +34,15 @@ export function TaskCard({
           <span>{task.campaign.name}</span>
           {task.dueDate && (
             <span className={clsx(overdue && "font-bold text-red")}>
-              {overdue ? "Overdue · " : "Due "}
+              {overdue ? "เกินกำหนด · " : "กำหนดส่ง "}
               {formatDue(task.dueDate)}
             </span>
           )}
         </div>
         {nextTask && (
           <div className="mt-1.5 text-[10px] text-muted">
-            Next: <strong className="font-bold text-[#59677a]">{nextTask.owner?.name ?? "—"} / {nextTask.name}</strong>
-            {nextTask.status === "BLOCKED" && <span className="ml-1 font-extrabold text-[#a86c1a]">Waiting for you</span>}
+            ถัดไป: <strong className="font-bold text-[#59677a]">{nextTask.owner?.name ?? "—"} / {nextTask.name}</strong>
+            {nextTask.status === "BLOCKED" && <span className="ml-1 font-extrabold text-[#a86c1a]">รอคุณดำเนินการ</span>}
           </div>
         )}
       </div>

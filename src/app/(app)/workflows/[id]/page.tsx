@@ -36,7 +36,7 @@ export default async function WorkflowEditorPage({ params }: { params: Promise<{
 
   return (
     <div>
-      <PageHeader eyebrow="Workflow Template" title={template.name} />
+      <PageHeader eyebrow="เทมเพลตเวิร์กโฟลว์" title={template.name} />
 
       <div className="grid gap-4">
         <div className="overflow-hidden rounded-[17px] border border-line bg-white">
@@ -44,10 +44,10 @@ export default async function WorkflowEditorPage({ params }: { params: Promise<{
             <thead>
               <tr className="border-b border-line text-left text-[9px] font-extrabold uppercase tracking-wide text-muted">
                 <th className="px-4 py-3">#</th>
-                <th className="px-4 py-3">Task</th>
-                <th className="px-4 py-3">Team</th>
-                <th className="px-4 py-3">Depends On</th>
-                <th className="px-4 py-3">Duration</th>
+                <th className="px-4 py-3">งาน</th>
+                <th className="px-4 py-3">ทีม</th>
+                <th className="px-4 py-3">ขึ้นอยู่กับ</th>
+                <th className="px-4 py-3">ระยะเวลา</th>
                 {canEdit && <th className="px-4 py-3" />}
               </tr>
             </thead>
@@ -58,11 +58,11 @@ export default async function WorkflowEditorPage({ params }: { params: Promise<{
                   <td className="px-4 py-3 font-bold">{t.name}</td>
                   <td className="px-4 py-3 text-muted">{t.defaultTeam?.name ?? "—"}</td>
                   <td className="px-4 py-3 text-muted">{t.dependsOn.map((d) => d.dependsOnTask.name).join(", ") || "—"}</td>
-                  <td className="px-4 py-3 text-muted">{t.defaultDurationDays ? `${t.defaultDurationDays}d` : "—"}</td>
+                  <td className="px-4 py-3 text-muted">{t.defaultDurationDays ? `${t.defaultDurationDays} วัน` : "—"}</td>
                   {canEdit && (
                     <td className="px-4 py-3 text-right">
                       <form action={deleteTemplateTaskAction.bind(null, id, t.id)}>
-                        <button className="text-[10px] font-bold text-red">Remove</button>
+                        <button className="text-[10px] font-bold text-red">ลบ</button>
                       </form>
                     </td>
                   )}
@@ -71,7 +71,7 @@ export default async function WorkflowEditorPage({ params }: { params: Promise<{
               {template.tasks.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-muted">
-                    No tasks in this template yet.
+                    ยังไม่มีงานในเทมเพลตนี้
                   </td>
                 </tr>
               )}
@@ -82,24 +82,24 @@ export default async function WorkflowEditorPage({ params }: { params: Promise<{
         {canEdit && (
           <>
             <div className="rounded-[17px] border border-line bg-white p-5">
-              <h3 className="mb-3 text-sm font-extrabold">Add a task</h3>
+              <h3 className="mb-3 text-sm font-extrabold">เพิ่มงาน</h3>
               <form action={addTask} className="grid grid-cols-[2fr_1fr_1fr_auto] gap-2.5">
-                <input name="name" required placeholder="Task name" className="h-10 rounded-[10px] border border-line px-3 text-[11px]" />
+                <input name="name" required placeholder="ชื่องาน" className="h-10 rounded-[10px] border border-line px-3 text-[11px]" />
                 <select name="teamId" className="h-10 rounded-[10px] border border-line px-2 text-[11px]">
-                  <option value="">No team</option>
+                  <option value="">ไม่มีทีม</option>
                   {teams.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name}
                     </option>
                   ))}
                 </select>
-                <input name="durationDays" type="number" min="0" placeholder="Days" className="h-10 rounded-[10px] border border-line px-3 text-[11px]" />
-                <button className="h-10 rounded-[10px] bg-primary px-4 text-[11px] font-extrabold text-[#173f5c]">Add</button>
+                <input name="durationDays" type="number" min="0" placeholder="วัน" className="h-10 rounded-[10px] border border-line px-3 text-[11px]" />
+                <button className="h-10 rounded-[10px] bg-primary px-4 text-[11px] font-extrabold text-[#173f5c]">เพิ่ม</button>
               </form>
             </div>
 
             <div className="rounded-[17px] border border-line bg-white p-5">
-              <h3 className="mb-3 text-sm font-extrabold">Connect a dependency</h3>
+              <h3 className="mb-3 text-sm font-extrabold">เชื่อมความสัมพันธ์</h3>
               <form
                 action={async (formData: FormData) => {
                   "use server";
@@ -108,7 +108,7 @@ export default async function WorkflowEditorPage({ params }: { params: Promise<{
                 className="grid grid-cols-[1fr_1fr_auto] gap-2.5"
               >
                 <select name="taskId" required className="h-10 rounded-[10px] border border-line px-2 text-[11px]">
-                  <option value="">This task…</option>
+                  <option value="">งานนี้…</option>
                   {template.tasks.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name}
@@ -116,14 +116,14 @@ export default async function WorkflowEditorPage({ params }: { params: Promise<{
                   ))}
                 </select>
                 <select name="dependsOnTaskId" required className="h-10 rounded-[10px] border border-line px-2 text-[11px]">
-                  <option value="">…depends on</option>
+                  <option value="">…ขึ้นอยู่กับ</option>
                   {template.tasks.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name}
                     </option>
                   ))}
                 </select>
-                <button className="h-10 rounded-[10px] bg-primary px-4 text-[11px] font-extrabold text-[#173f5c]">Connect</button>
+                <button className="h-10 rounded-[10px] bg-primary px-4 text-[11px] font-extrabold text-[#173f5c]">เชื่อม</button>
               </form>
             </div>
           </>

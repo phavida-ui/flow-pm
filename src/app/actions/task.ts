@@ -11,7 +11,7 @@ export type ActionState = { error?: string } | undefined;
 async function assertPlanningEditable(campaignId: string) {
   const campaign = await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId } });
   if (campaign.status !== "PLANNING" && campaign.status !== "DRAFT") {
-    throw new ForbiddenError("Tasks can only be added or removed while the campaign is in Planning.");
+    throw new ForbiddenError("เพิ่มหรือลบงานได้เฉพาะตอนที่แคมเปญอยู่ในสถานะกำลังวางแผนเท่านั้น");
   }
   return campaign;
 }
@@ -22,7 +22,7 @@ export async function createTaskAction(campaignId: string, _prev: ActionState, f
     await assertPlanningEditable(campaignId);
 
     const name = String(formData.get("name") ?? "").trim();
-    if (!name) return { error: "Task name is required." };
+    if (!name) return { error: "กรุณากรอกชื่องาน" };
 
     const dueDateRaw = formData.get("dueDate");
     const dependsOn = formData.get("dependsOn") ? String(formData.get("dependsOn")) : null;
@@ -108,7 +108,7 @@ export async function reassignTaskAction(
   changes: { ownerId?: string | null; approverId?: string | null }
 ) {
   const user = await requireUser();
-  if (!isManagerOrAdmin(user)) throw new ForbiddenError("Only managers or admins can reassign tasks");
+  if (!isManagerOrAdmin(user)) throw new ForbiddenError("เฉพาะผู้จัดการหรือผู้ดูแลระบบเท่านั้นที่มอบหมายงานใหม่ได้");
   await taskService.reassignTask(taskId, user.id, changes);
   revalidatePath(`/tasks/${taskId}`);
   revalidatePath(`/campaigns/${campaignId}`);

@@ -84,14 +84,14 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
 }
 
 export class AuthError extends Error {
-  constructor(message = "Not authenticated") {
+  constructor(message = "ยังไม่ได้เข้าสู่ระบบ") {
     super(message);
     this.name = "AuthError";
   }
 }
 
 export class ForbiddenError extends Error {
-  constructor(message = "Not authorized") {
+  constructor(message = "ไม่ได้รับอนุญาต") {
     super(message);
     this.name = "ForbiddenError";
   }

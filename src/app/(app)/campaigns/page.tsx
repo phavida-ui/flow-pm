@@ -16,14 +16,14 @@ export default async function CampaignsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Campaigns"
-        title="Campaigns"
+        eyebrow="แคมเปญ"
+        title="แคมเปญ"
         actions={isManagerOrAdmin(user) ? <NewCampaignDialog users={users} templates={templates} /> : undefined}
       />
 
       {campaigns.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center text-sm text-muted">
-          No campaigns yet.
+          ยังไม่มีแคมเปญ
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 max-[900px]:grid-cols-1">

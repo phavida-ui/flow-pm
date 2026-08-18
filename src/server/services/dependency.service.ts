@@ -93,7 +93,7 @@ export function computeUnblockedTaskIds(
 }
 
 export class CycleError extends Error {
-  constructor(message = "This would create a circular dependency") {
+  constructor(message = "การเชื่อมโยงนี้จะทำให้เกิดการพึ่งพากันแบบวนลูป") {
     super(message);
     this.name = "CycleError";
   }

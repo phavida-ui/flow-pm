@@ -10,7 +10,7 @@ export type ActionState = { error?: string } | undefined;
 export async function createTemplateAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireRole("ADMIN", "MANAGER");
   const name = String(formData.get("name") ?? "").trim();
-  if (!name) return { error: "Template name is required." };
+  if (!name) return { error: "กรุณากรอกชื่อเทมเพลต" };
 
   const template = await prisma.workflowTemplate.create({
     data: { name, description: String(formData.get("description") ?? "") || null, createdBy: user.id },

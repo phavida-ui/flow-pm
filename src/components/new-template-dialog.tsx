@@ -15,25 +15,25 @@ export function NewTemplateDialog() {
       onOpenChange={setOpen}
       trigger={
         <button className="inline-flex h-10 items-center gap-1.5 rounded-[11px] bg-primary px-4 text-xs font-extrabold text-[#173f5c] hover:bg-primary-strong">
-          <Plus size={14} /> New Template
+          <Plus size={14} /> เทมเพลตใหม่
         </button>
       }
-      eyebrow="New"
-      title="Create a workflow template"
+      eyebrow="ใหม่"
+      title="สร้างเทมเพลตเวิร์กโฟลว์"
     >
       <form action={formAction} className="grid gap-3.5 p-5">
         <label className="grid gap-1.5">
-          <span className="text-[10px] font-extrabold text-[#59677a]">Template name</span>
-          <input name="name" required placeholder="e.g. Marketing Campaign" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+          <span className="text-[10px] font-extrabold text-[#59677a]">ชื่อเทมเพลต</span>
+          <input name="name" required placeholder="เช่น แคมเปญการตลาด" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
         </label>
         <label className="grid gap-1.5">
-          <span className="text-[10px] font-extrabold text-[#59677a]">Description</span>
-          <input name="description" placeholder="What is this playbook for?" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+          <span className="text-[10px] font-extrabold text-[#59677a]">คำอธิบาย</span>
+          <input name="description" placeholder="เทมเพลตนี้ใช้สำหรับอะไร?" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
         </label>
         {state?.error && <p className="rounded-lg bg-red-soft px-3 py-2 text-xs font-semibold text-red">{state.error}</p>}
         <div className="mt-1 flex justify-end">
           <button type="submit" disabled={pending} className="h-10 rounded-[11px] bg-primary px-4 text-xs font-extrabold text-[#173f5c] disabled:opacity-60">
-            {pending ? "Creating…" : "Create template"}
+            {pending ? "กำลังสร้าง…" : "สร้างเทมเพลต"}
           </button>
         </div>
       </form>

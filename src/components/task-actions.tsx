@@ -43,29 +43,29 @@ export function TaskActions({
       <div className="flex flex-wrap gap-2.5">
         {status === "READY" && isOwner && (
           <button disabled={pending} className={btnClass} onClick={() => run(() => startTaskAction(taskId, campaignId))}>
-            Start Task
+            เริ่มงาน
           </button>
         )}
 
         {status === "IN_PROGRESS" && isOwner && (
           <button disabled={pending} className={btnClass} onClick={() => run(() => submitTaskAction(taskId, campaignId))}>
-            {hasApprover ? "Submit for Review" : "Complete Task"}
+            {hasApprover ? "ส่งตรวจสอบ" : "งานเสร็จสิ้น"}
           </button>
         )}
 
         {status === "REVISION" && isOwner && (
           <button disabled={pending} className={btnClass} onClick={() => run(() => resumeAfterRevisionAction(taskId, campaignId))}>
-            Resume Work
+            ดำเนินงานต่อ
           </button>
         )}
 
         {status === "REVIEW" && isApprover && !showRevisionInput && (
           <>
             <button disabled={pending} className={btnClass} onClick={() => run(() => approveTaskAction(taskId, campaignId, comment))}>
-              Approve
+              อนุมัติ
             </button>
             <button disabled={pending} className={btnDangerClass} onClick={() => setShowRevisionInput(true)}>
-              Request Revision
+              ขอให้แก้ไข
             </button>
           </>
         )}
@@ -76,7 +76,7 @@ export function TaskActions({
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="What needs to change? (required)"
+            placeholder="ต้องแก้ไขอะไรบ้าง? (จำเป็นต้องกรอก)"
             rows={3}
             className="rounded-[11px] border border-line p-3 text-[12px] outline-none focus:border-primary"
           />
@@ -86,10 +86,10 @@ export function TaskActions({
               className={btnDangerClass}
               onClick={() => run(() => requestRevisionAction(taskId, campaignId, comment))}
             >
-              Send Back for Revision
+              ส่งกลับให้แก้ไข
             </button>
             <button className="h-11 rounded-[11px] border border-line px-4 text-[12px] font-bold text-muted" onClick={() => setShowRevisionInput(false)}>
-              Cancel
+              ยกเลิก
             </button>
           </div>
         </div>

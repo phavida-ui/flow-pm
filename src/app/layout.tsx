@@ -13,14 +13,14 @@ const notoSansThai = Noto_Sans_Thai({
 });
 
 export const metadata: Metadata = {
-  title: "FLOW — Campaign Handoff & Planning",
-  description: "Handoff-first project management for cross-functional campaigns.",
+  title: "FLOW — ส่งต่องานและวางแผนแคมเปญ",
+  description: "ระบบบริหารโครงการที่เน้นการส่งต่องานสำหรับแคมเปญข้ามทีม",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="en"
+      lang="th"
       className={`${inter.variable} ${notoSansThai.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>

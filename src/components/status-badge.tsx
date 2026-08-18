@@ -2,14 +2,14 @@ import type { TaskStatus } from "@prisma/client";
 import { clsx } from "clsx";
 
 const LABELS: Record<TaskStatus, string> = {
-  PLANNED: "Planned",
-  BLOCKED: "Blocked",
-  READY: "Ready",
-  IN_PROGRESS: "In Progress",
-  REVIEW: "Review",
-  REVISION: "Revision",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
+  PLANNED: "วางแผนแล้ว",
+  BLOCKED: "ติดขัด",
+  READY: "พร้อมดำเนินการ",
+  IN_PROGRESS: "กำลังดำเนินการ",
+  REVIEW: "รอตรวจสอบ",
+  REVISION: "ต้องแก้ไข",
+  COMPLETED: "เสร็จสิ้น",
+  CANCELLED: "ยกเลิก",
 };
 
 const STYLES: Record<TaskStatus, string> = {

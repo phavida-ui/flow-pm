@@ -21,31 +21,31 @@ export function NewCampaignDialog({
       onOpenChange={setOpen}
       trigger={
         <button className="inline-flex h-10 items-center gap-1.5 rounded-[11px] bg-primary px-4 text-xs font-extrabold text-[#173f5c] hover:bg-primary-strong">
-          <Plus size={14} /> New Campaign
+          <Plus size={14} /> แคมเปญใหม่
         </button>
       }
-      eyebrow="New"
-      title="Start a campaign"
+      eyebrow="ใหม่"
+      title="เริ่มแคมเปญ"
     >
       <form action={formAction} className="grid gap-3.5 p-5">
         <label className="grid gap-1.5">
-          <span className="text-[10px] font-extrabold text-[#59677a]">Campaign name</span>
+          <span className="text-[10px] font-extrabold text-[#59677a]">ชื่อแคมเปญ</span>
           <input
             name="name"
             required
-            placeholder="e.g. Birthday Campaign 2026"
+            placeholder="เช่น แคมเปญวันเกิด 2026"
             className="h-[41px] rounded-[10px] border border-line px-3 text-[11px] outline-none focus:border-primary focus:ring-4 focus:ring-primary-soft"
           />
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="grid gap-1.5">
-            <span className="text-[10px] font-extrabold text-[#59677a]">Owner</span>
+            <span className="text-[10px] font-extrabold text-[#59677a]">เจ้าของ</span>
             <select
               name="ownerId"
               required
               className="h-[41px] rounded-[10px] border border-line px-3 text-[11px] outline-none focus:border-primary"
             >
-              <option value="">Select owner</option>
+              <option value="">เลือกเจ้าของ</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.name}
@@ -54,7 +54,7 @@ export function NewCampaignDialog({
             </select>
           </label>
           <label className="grid gap-1.5">
-            <span className="text-[10px] font-extrabold text-[#59677a]">Target date</span>
+            <span className="text-[10px] font-extrabold text-[#59677a]">วันเป้าหมาย</span>
             <input
               name="targetDate"
               type="date"
@@ -63,12 +63,12 @@ export function NewCampaignDialog({
           </label>
         </div>
         <label className="grid gap-1.5">
-          <span className="text-[10px] font-extrabold text-[#59677a]">Start from a template (optional)</span>
+          <span className="text-[10px] font-extrabold text-[#59677a]">เริ่มจากเทมเพลต (ไม่บังคับ)</span>
           <select
             name="workflowTemplateId"
             className="h-[41px] rounded-[10px] border border-line px-3 text-[11px] outline-none focus:border-primary"
           >
-            <option value="">Blank campaign</option>
+            <option value="">แคมเปญเปล่า</option>
             {templates.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
@@ -85,7 +85,7 @@ export function NewCampaignDialog({
             disabled={pending}
             className="h-10 rounded-[11px] bg-primary px-4 text-xs font-extrabold text-[#173f5c] hover:bg-primary-strong disabled:opacity-60"
           >
-            {pending ? "Creating…" : "Create campaign"}
+            {pending ? "กำลังสร้าง…" : "สร้างแคมเปญ"}
           </button>
         </div>
       </form>

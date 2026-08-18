@@ -9,7 +9,7 @@ export function LoginForm() {
   return (
     <form action={formAction} className="grid gap-4">
       <label className="grid gap-1.5">
-        <span className="text-xs font-bold text-muted">Email</span>
+        <span className="text-xs font-bold text-muted">อีเมล</span>
         <input
           name="email"
           type="email"
@@ -20,7 +20,7 @@ export function LoginForm() {
         />
       </label>
       <label className="grid gap-1.5">
-        <span className="text-xs font-bold text-muted">Password</span>
+        <span className="text-xs font-bold text-muted">รหัสผ่าน</span>
         <input
           name="password"
           type="password"
@@ -40,7 +40,7 @@ export function LoginForm() {
         disabled={pending}
         className="h-11 rounded-xl bg-primary text-sm font-bold text-[#173f5c] transition hover:bg-primary-strong disabled:opacity-60"
       >
-        {pending ? "Signing in…" : "Sign in"}
+        {pending ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
       </button>
     </form>
   );

@@ -11,7 +11,7 @@ export function MarkAllReadButton() {
       onClick={() => startTransition(() => markAllReadAction())}
       className="h-10 rounded-[11px] border border-line bg-white px-4 text-xs font-extrabold text-[#536174] hover:bg-[#f7fafc] disabled:opacity-60"
     >
-      Mark all read
+      อ่านทั้งหมดแล้ว
     </button>
   );
 }

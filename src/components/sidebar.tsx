@@ -8,10 +8,10 @@ import { Avatar } from "@/components/avatar";
 import { logoutAction } from "@/app/actions/auth";
 
 const NAV = [
-  { href: "/my-work", label: "My Work", icon: Home },
-  { href: "/campaigns", label: "Campaigns", icon: LayoutGrid },
-  { href: "/approvals", label: "Approvals", icon: CheckCircle2, badgeKey: "approvals" as const },
-  { href: "/workflows", label: "Workflows", icon: GitBranch },
+  { href: "/my-work", label: "งานของฉัน", icon: Home },
+  { href: "/campaigns", label: "แคมเปญ", icon: LayoutGrid },
+  { href: "/approvals", label: "การอนุมัติ", icon: CheckCircle2, badgeKey: "approvals" as const },
+  { href: "/workflows", label: "เวิร์กโฟลว์", icon: GitBranch },
 ];
 
 export function Sidebar({
@@ -33,7 +33,7 @@ export function Sidebar({
         </div>
         <div className="grid gap-0.5 max-[1000px]:hidden">
           <strong className="text-[15px] tracking-wide">FLOW</strong>
-          <span className="text-[10px] text-muted">Handoff, made visible</span>
+          <span className="text-[10px] text-muted">มองเห็นการส่งต่องานได้ชัดเจน</span>
         </div>
       </div>
 
@@ -68,7 +68,7 @@ export function Sidebar({
           className="grid grid-cols-[26px_1fr_auto] items-center rounded-[13px] p-3 text-left text-[13px] font-bold text-[#667486] hover:bg-[#f7fafc] max-[1000px]:grid-cols-1 max-[1000px]:place-items-center"
         >
           <Bell size={17} />
-          <span className="max-[1000px]:hidden">Notifications</span>
+          <span className="max-[1000px]:hidden">การแจ้งเตือน</span>
           {unreadCount > 0 && (
             <span className="rounded-full bg-red-soft px-1.5 py-0.5 text-[9px] font-extrabold text-red max-[1000px]:hidden">
               {unreadCount}
@@ -80,7 +80,7 @@ export function Sidebar({
           className="grid grid-cols-[26px_1fr_auto] items-center rounded-[13px] p-3 text-left text-[13px] font-bold text-[#667486] hover:bg-[#f7fafc] max-[1000px]:grid-cols-1 max-[1000px]:place-items-center"
         >
           <Settings size={17} />
-          <span className="max-[1000px]:hidden">Settings</span>
+          <span className="max-[1000px]:hidden">ตั้งค่า</span>
         </Link>
 
         <div className="mt-1 flex items-center gap-2.5 border-t border-line pt-4 max-[1000px]:justify-center">
@@ -95,7 +95,7 @@ export function Sidebar({
             type="submit"
             className="flex items-center gap-2 rounded-[13px] p-2 text-[11px] font-bold text-muted hover:bg-[#f7fafc]"
           >
-            <LogOut size={14} /> <span className="max-[1000px]:hidden">Sign out</span>
+            <LogOut size={14} /> <span className="max-[1000px]:hidden">ออกจากระบบ</span>
           </button>
         </form>
       </div>

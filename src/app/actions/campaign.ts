@@ -16,7 +16,7 @@ export async function createCampaignAction(_prev: ActionState, formData: FormDat
   const targetDate = formData.get("targetDate") ? new Date(String(formData.get("targetDate"))) : null;
   const workflowTemplateId = formData.get("workflowTemplateId") ? String(formData.get("workflowTemplateId")) : null;
 
-  if (!name || !ownerId) return { error: "Name and owner are required." };
+  if (!name || !ownerId) return { error: "กรุณากรอกชื่อและเจ้าของ" };
 
   const campaign = await campaignService.createCampaign({
     name,

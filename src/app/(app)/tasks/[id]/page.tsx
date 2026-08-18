@@ -54,19 +54,19 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
             <div className="grid grid-cols-4 gap-3 text-[11px]">
               <div>
-                <span className="block text-[9px] font-bold text-muted">Owner</span>
-                <strong className="mt-1 block">{task.owner?.name ?? "Unassigned"}</strong>
+                <span className="block text-[9px] font-bold text-muted">เจ้าของ</span>
+                <strong className="mt-1 block">{task.owner?.name ?? "ยังไม่มอบหมาย"}</strong>
               </div>
               <div>
-                <span className="block text-[9px] font-bold text-muted">Team</span>
+                <span className="block text-[9px] font-bold text-muted">ทีม</span>
                 <strong className="mt-1 block">{task.team?.name ?? "—"}</strong>
               </div>
               <div>
-                <span className="block text-[9px] font-bold text-muted">Approver</span>
-                <strong className="mt-1 block">{task.approver?.name ?? "None required"}</strong>
+                <span className="block text-[9px] font-bold text-muted">ผู้อนุมัติ</span>
+                <strong className="mt-1 block">{task.approver?.name ?? "ไม่ต้องอนุมัติ"}</strong>
               </div>
               <div>
-                <span className="block text-[9px] font-bold text-muted">Due</span>
+                <span className="block text-[9px] font-bold text-muted">กำหนดส่ง</span>
                 <strong className="mt-1 block">{task.dueDate ? formatDue(task.dueDate) : "—"}</strong>
               </div>
             </div>
@@ -96,9 +96,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           )}
 
           <div className="rounded-[17px] border border-line bg-white p-5">
-            <h3 className="mb-3 text-sm font-extrabold">Comments</h3>
+            <h3 className="mb-3 text-sm font-extrabold">ความคิดเห็น</h3>
             <div className="mb-3 grid gap-3">
-              {task.comments.length === 0 && <p className="text-[11px] text-muted">No comments yet.</p>}
+              {task.comments.length === 0 && <p className="text-[11px] text-muted">ยังไม่มีความคิดเห็น</p>}
               {task.comments.map((c) => (
                 <div key={c.id} className="flex gap-2.5">
                   <Avatar name={c.user.name} size={26} />
@@ -117,9 +117,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
         <div className="grid gap-4">
           <div className="rounded-[17px] border border-line bg-white p-4">
-            <h4 className="mb-3 text-[10px] font-extrabold uppercase tracking-wide text-muted">Upstream</h4>
+            <h4 className="mb-3 text-[10px] font-extrabold uppercase tracking-wide text-muted">งานที่ต้องทำก่อน</h4>
             {task.dependsOn.length === 0 ? (
-              <p className="text-[11px] text-muted">Nothing — this can start anytime.</p>
+              <p className="text-[11px] text-muted">ไม่มี — เริ่มงานนี้ได้ทุกเมื่อ</p>
             ) : (
               <div className="grid gap-2">
                 {task.dependsOn.map((d) => (
@@ -136,9 +136,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           </div>
 
           <div className="rounded-[17px] border border-line bg-white p-4">
-            <h4 className="mb-3 text-[10px] font-extrabold uppercase tracking-wide text-muted">Downstream</h4>
+            <h4 className="mb-3 text-[10px] font-extrabold uppercase tracking-wide text-muted">งานที่รอต่อจากนี้</h4>
             {task.dependents.length === 0 ? (
-              <p className="text-[11px] text-muted">Nobody is waiting on this task.</p>
+              <p className="text-[11px] text-muted">ไม่มีใครรองานนี้อยู่</p>
             ) : (
               <div className="grid gap-2">
                 {task.dependents.map((d) => (
@@ -147,7 +147,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                     <div className="mt-1 flex items-center justify-between">
                       <span className="text-[9px] text-muted">{d.task.owner?.name}</span>
                       {d.task.status === "BLOCKED" && task.status !== "COMPLETED" ? (
-                        <span className="text-[9px] font-extrabold text-[#a86c1a]">Waiting for you</span>
+                        <span className="text-[9px] font-extrabold text-[#a86c1a]">รอคุณดำเนินการ</span>
                       ) : (
                         <StatusBadge status={d.task.status} />
                       )}

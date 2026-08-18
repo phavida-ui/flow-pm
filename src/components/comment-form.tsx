@@ -21,12 +21,12 @@ export function CommentForm({ taskId, campaignId }: { taskId: string; campaignId
     >
       <input
         name="body"
-        placeholder="Add a comment…"
+        placeholder="เพิ่มความคิดเห็น…"
         required
         className="h-10 flex-1 rounded-[10px] border border-line px-3 text-[12px] outline-none focus:border-primary"
       />
       <button disabled={pending} className="h-10 rounded-[10px] bg-primary px-4 text-[11px] font-extrabold text-[#173f5c] disabled:opacity-60">
-        Post
+        โพสต์
       </button>
     </form>
   );

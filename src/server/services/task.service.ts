@@ -21,7 +21,7 @@ export const TASK_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
 
 export class InvalidTransitionError extends Error {
   constructor(from: TaskStatus, to: TaskStatus) {
-    super(`Cannot move task from ${from} to ${to}`);
+    super(`ไม่สามารถเปลี่ยนสถานะงานจาก ${from} เป็น ${to} ได้`);
     this.name = "InvalidTransitionError";
   }
 }
@@ -98,14 +98,14 @@ export async function updateTask(
 export async function deleteTask(taskId: string) {
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
   if (task.status !== "PLANNED") {
-    throw new Error("Only tasks still in PLANNED status can be deleted");
+    throw new Error("ลบได้เฉพาะงานที่ยังอยู่ในสถานะวางแผนแล้วเท่านั้น");
   }
   return prisma.task.delete({ where: { id: taskId } });
 }
 
 export async function startTask(taskId: string, actorId: string) {
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-  if (task.ownerId !== actorId) throw new ForbiddenError("Only the task owner can start this task");
+  if (task.ownerId !== actorId) throw new ForbiddenError("เฉพาะเจ้าของงานเท่านั้นที่เริ่มงานนี้ได้");
   assertTransition(task.status, "IN_PROGRESS");
 
   return prisma.$transaction(async (tx) => {
@@ -180,8 +180,8 @@ export async function reassignTask(
         type: "TASK_ASSIGNED",
         campaignId: task.campaignId,
         taskId,
-        title: "You were assigned a task",
-        message: `You are now the owner of "${task.name}"`,
+        title: "คุณได้รับมอบหมายงาน",
+        message: `ตอนนี้คุณเป็นเจ้าของงาน "${task.name}"`,
       });
     }
 
