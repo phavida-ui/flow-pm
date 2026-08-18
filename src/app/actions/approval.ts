@@ -6,14 +6,14 @@ import * as approvalService from "@/server/services/approval.service";
 
 export type ActionState = { error?: string } | undefined;
 
-function paths(taskId: string, campaignId: string) {
+function paths(taskId: string, campaignId: string | null) {
   revalidatePath(`/tasks/${taskId}`);
-  revalidatePath(`/campaigns/${campaignId}`);
+  if (campaignId) revalidatePath(`/campaigns/${campaignId}`);
   revalidatePath("/my-work");
   revalidatePath("/approvals");
 }
 
-export async function submitTaskAction(taskId: string, campaignId: string): Promise<ActionState> {
+export async function submitTaskAction(taskId: string, campaignId: string | null): Promise<ActionState> {
   const user = await requireUser();
   try {
     await approvalService.submitTask(taskId, user.id);
@@ -24,7 +24,7 @@ export async function submitTaskAction(taskId: string, campaignId: string): Prom
   paths(taskId, campaignId);
 }
 
-export async function approveTaskAction(taskId: string, campaignId: string, comment: string): Promise<ActionState> {
+export async function approveTaskAction(taskId: string, campaignId: string | null, comment: string): Promise<ActionState> {
   const user = await requireUser();
   try {
     await approvalService.approveTask(taskId, user.id, comment || undefined);
@@ -35,7 +35,7 @@ export async function approveTaskAction(taskId: string, campaignId: string, comm
   paths(taskId, campaignId);
 }
 
-export async function requestRevisionAction(taskId: string, campaignId: string, comment: string): Promise<ActionState> {
+export async function requestRevisionAction(taskId: string, campaignId: string | null, comment: string): Promise<ActionState> {
   const user = await requireUser();
   try {
     await approvalService.requestRevision(taskId, user.id, comment);
@@ -46,7 +46,7 @@ export async function requestRevisionAction(taskId: string, campaignId: string, 
   paths(taskId, campaignId);
 }
 
-export async function resumeAfterRevisionAction(taskId: string, campaignId: string): Promise<ActionState> {
+export async function resumeAfterRevisionAction(taskId: string, campaignId: string | null): Promise<ActionState> {
   const user = await requireUser();
   try {
     await approvalService.resumeAfterRevision(taskId, user.id);

@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 
 const LABELS: Record<TaskStatus, string> = {
   PLANNED: "วางแผนแล้ว",
-  BLOCKED: "ติดขัด",
+  BLOCKED: "กำลังรอ",
   READY: "พร้อมดำเนินการ",
   IN_PROGRESS: "กำลังดำเนินการ",
   REVIEW: "รอตรวจสอบ",

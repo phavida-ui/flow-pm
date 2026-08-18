@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { startTaskAction } from "@/app/actions/task";
 import { submitTaskAction, approveTaskAction, requestRevisionAction, resumeAfterRevisionAction } from "@/app/actions/approval";
-import type { TaskStatus } from "@prisma/client";
+import { MarkBlockedControl } from "@/components/mark-blocked-control";
+import type { TaskStatus, TaskBlockedReason } from "@prisma/client";
 
 export function TaskActions({
   taskId,
@@ -12,13 +13,19 @@ export function TaskActions({
   isOwner,
   isApprover,
   hasApprover,
+  blockedReason,
+  blockedNote,
+  blockedAt,
 }: {
   taskId: string;
-  campaignId: string;
+  campaignId: string | null;
   status: TaskStatus;
   isOwner: boolean;
   isApprover: boolean;
   hasApprover: boolean;
+  blockedReason: TaskBlockedReason | null;
+  blockedNote: string | null;
+  blockedAt: Date | null;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -48,9 +55,18 @@ export function TaskActions({
         )}
 
         {status === "IN_PROGRESS" && isOwner && (
-          <button disabled={pending} className={btnClass} onClick={() => run(() => submitTaskAction(taskId, campaignId))}>
-            {hasApprover ? "ส่งตรวจสอบ" : "งานเสร็จสิ้น"}
-          </button>
+          <>
+            <button disabled={pending} className={btnClass} onClick={() => run(() => submitTaskAction(taskId, campaignId))}>
+              {hasApprover ? "ส่งตรวจสอบ" : "งานเสร็จสิ้น"}
+            </button>
+            <MarkBlockedControl
+              taskId={taskId}
+              campaignId={campaignId}
+              blockedAt={blockedAt}
+              blockedReason={blockedReason}
+              blockedNote={blockedNote}
+            />
+          </>
         )}
 
         {status === "REVISION" && isOwner && (

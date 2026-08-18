@@ -3,7 +3,7 @@
 import { useRef, useTransition } from "react";
 import { addCommentAction } from "@/app/actions/task";
 
-export function CommentForm({ taskId, campaignId }: { taskId: string; campaignId: string }) {
+export function CommentForm({ taskId, campaignId }: { taskId: string; campaignId: string | null }) {
   const ref = useRef<HTMLFormElement>(null);
   const [pending, startTransition] = useTransition();
 

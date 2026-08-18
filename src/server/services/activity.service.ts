@@ -7,7 +7,7 @@ type Tx = PrismaClient | Prisma.TransactionClient;
 export async function logActivity(
   db: Tx,
   params: {
-    campaignId: string;
+    campaignId?: string | null;
     taskId?: string | null;
     actorId?: string | null;
     eventType: ActivityEventType;
@@ -16,7 +16,7 @@ export async function logActivity(
 ) {
   return db.activityLog.create({
     data: {
-      campaignId: params.campaignId,
+      campaignId: params.campaignId ?? null,
       taskId: params.taskId ?? null,
       actorId: params.actorId ?? null,
       eventType: params.eventType,

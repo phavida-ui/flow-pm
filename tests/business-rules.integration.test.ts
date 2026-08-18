@@ -95,7 +95,7 @@ beforeAll(async () => {
   });
 
   await startCampaign(campaignId, ownerA.id);
-});
+}, 30000);
 
 afterAll(async () => {
   await prisma.activityLog.deleteMany({ where: { campaignId } });

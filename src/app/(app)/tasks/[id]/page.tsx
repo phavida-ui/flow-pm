@@ -5,6 +5,7 @@ import { prisma } from "@/server/db";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
+import { BlockedFlagBadge } from "@/components/blocked-flag-badge";
 import { TaskActions } from "@/components/task-actions";
 import { ReassignControls } from "@/components/reassign-controls";
 import { CommentForm } from "@/components/comment-form";
@@ -44,7 +45,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <PageHeader eyebrow={task.campaign.name} title={task.name} />
+      <PageHeader eyebrow={task.campaign?.name ?? "งานเดี่ยว"} title={task.name} />
 
       <div className="grid grid-cols-[1.4fr_.6fr] gap-5 max-[900px]:grid-cols-1">
         <div className="grid gap-4">
@@ -53,17 +54,22 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
               <div className="flex items-center gap-2">
                 <StatusBadge status={task.status} />
                 <PriorityBadge priority={task.priority} />
+                <BlockedFlagBadge blockedAt={task.blockedAt} blockedReason={task.blockedReason} />
               </div>
-              <Link href={`/campaigns/${task.campaign.id}`} className="text-[11px] font-bold text-primary-strong hover:underline">
-                {task.campaign.name}
-              </Link>
+              {task.campaign ? (
+                <Link href={`/campaigns/${task.campaign.id}`} className="text-[11px] font-bold text-primary-strong hover:underline">
+                  {task.campaign.name}
+                </Link>
+              ) : (
+                <span className="text-[11px] font-bold text-muted">งานเดี่ยว</span>
+              )}
             </div>
 
             {task.description && <p className="mb-4 text-[12px] leading-relaxed text-[#3c4a5c]">{task.description}</p>}
 
             <div className="grid grid-cols-4 gap-3 text-[11px]">
               <div>
-                <span className="block text-[9px] font-bold text-muted">เจ้าของ</span>
+                <span className="block text-[9px] font-bold text-muted">คนรับผิดชอบ</span>
                 <strong className="mt-1 block">{task.owner?.name ?? "ยังไม่มอบหมาย"}</strong>
               </div>
               <div>
@@ -82,7 +88,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
             {canManage && (
               <div className="mt-4 border-t border-line pt-4">
-                <ReassignControls taskId={task.id} campaignId={task.campaign.id} ownerId={task.ownerId} approverId={task.approverId} users={users} />
+                <ReassignControls taskId={task.id} campaignId={task.campaign?.id ?? null} ownerId={task.ownerId} approverId={task.approverId} users={users} />
               </div>
             )}
           </div>
@@ -90,11 +96,14 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
           <div className="rounded-[17px] border border-line bg-white p-5">
             <TaskActions
               taskId={task.id}
-              campaignId={task.campaign.id}
+              campaignId={task.campaign?.id ?? null}
               status={task.status}
               isOwner={isOwner}
               isApprover={isApprover}
               hasApprover={Boolean(task.approverId)}
+              blockedReason={task.blockedReason}
+              blockedNote={task.blockedNote}
+              blockedAt={task.blockedAt}
             />
           </div>
 
@@ -104,7 +113,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             </div>
           )}
 
-          <SubtaskList taskId={task.id} campaignId={task.campaign.id} subtasks={subtasks} users={users} />
+          <SubtaskList taskId={task.id} campaignId={task.campaign?.id ?? null} subtasks={subtasks} users={users} />
 
           <div className="rounded-[17px] border border-line bg-white p-5">
             <h3 className="mb-3 text-sm font-extrabold">ความคิดเห็น</h3>
@@ -122,7 +131,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
                 </div>
               ))}
             </div>
-            <CommentForm taskId={task.id} campaignId={task.campaign.id} />
+            <CommentForm taskId={task.id} campaignId={task.campaign?.id ?? null} />
           </div>
         </div>
 

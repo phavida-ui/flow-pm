@@ -22,7 +22,7 @@ export function SubtaskList({
   users,
 }: {
   taskId: string;
-  campaignId: string;
+  campaignId: string | null;
   subtasks: SubtaskRow[];
   users: Option[];
 }) {

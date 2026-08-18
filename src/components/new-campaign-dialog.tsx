@@ -39,13 +39,13 @@ export function NewCampaignDialog({
         </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="grid gap-1.5">
-            <span className="text-[10px] font-extrabold text-[#59677a]">เจ้าของ</span>
+            <span className="text-[10px] font-extrabold text-[#59677a]">คนรับผิดชอบ</span>
             <select
               name="ownerId"
               required
               className="h-[41px] rounded-[10px] border border-line px-3 text-[11px] outline-none focus:border-primary"
             >
-              <option value="">เลือกเจ้าของ</option>
+              <option value="">เลือกคนรับผิดชอบ</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.name}

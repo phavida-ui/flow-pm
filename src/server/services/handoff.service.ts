@@ -19,7 +19,13 @@ export async function completeTaskCore(tx: Tx, taskId: string, actorId?: string 
 
   const updateResult = await tx.task.updateMany({
     where: { id: taskId, status: { not: "COMPLETED" } },
-    data: { status: "COMPLETED", completedAt: new Date() },
+    data: {
+      status: "COMPLETED",
+      completedAt: new Date(),
+      blockedReason: null,
+      blockedNote: null,
+      blockedAt: null,
+    },
   });
   if (updateResult.count === 0) {
     // Lost a race with a concurrent completion — treat as already done.
@@ -56,19 +62,25 @@ export async function completeTaskCore(tx: Tx, taskId: string, actorId?: string 
     });
     if (unblockResult.count === 0) continue; // already unblocked concurrently
 
-    const existingHandoff = await tx.taskHandoff.findUnique({
-      where: { fromTaskId_toTaskId: { fromTaskId: taskId, toTaskId: downstreamId } },
-    });
-    if (!existingHandoff) {
-      await tx.taskHandoff.create({
-        data: {
-          campaignId: task.campaignId,
-          fromTaskId: taskId,
-          toTaskId: downstreamId,
-          fromUserId: task.ownerId,
-          toUserId: downstream.ownerId ?? task.ownerId ?? actorId ?? "",
-        },
+    // Standalone tasks (campaignId null) can never have TaskDependency edges — the
+    // dependency picker only exists in campaign-scoped planning UI — so this branch
+    // is unreachable for them. Guard is still explicit here to satisfy the type and
+    // document the invariant.
+    if (task.campaignId) {
+      const existingHandoff = await tx.taskHandoff.findUnique({
+        where: { fromTaskId_toTaskId: { fromTaskId: taskId, toTaskId: downstreamId } },
       });
+      if (!existingHandoff) {
+        await tx.taskHandoff.create({
+          data: {
+            campaignId: task.campaignId,
+            fromTaskId: taskId,
+            toTaskId: downstreamId,
+            fromUserId: task.ownerId,
+            toUserId: downstream.ownerId ?? task.ownerId ?? actorId ?? "",
+          },
+        });
+      }
     }
 
     await logActivity(tx, {
@@ -94,11 +106,14 @@ export async function completeTaskCore(tx: Tx, taskId: string, actorId?: string 
         taskId: downstreamId,
         title: "พร้อมเริ่มงาน",
         message: `${task.name} เสร็จสิ้นแล้ว คุณสามารถเริ่มงาน "${downstream.name}" ได้ตอนนี้`,
+        dedupe: true,
       });
     }
   }
 
-  await checkCampaignCompletionCore(tx, task.campaignId, actorId);
+  if (task.campaignId) {
+    await checkCampaignCompletionCore(tx, task.campaignId, actorId);
+  }
 
   return tx.task.findUniqueOrThrow({ where: { id: taskId } });
 }

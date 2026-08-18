@@ -8,7 +8,7 @@ import { notify } from "@/server/services/notification.service";
 
 export async function submitTask(taskId: string, actorId: string) {
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-  if (task.ownerId !== actorId) throw new ForbiddenError("เฉพาะเจ้าของงานเท่านั้นที่ส่งงานนี้ได้");
+  if (task.ownerId !== actorId) throw new ForbiddenError("เฉพาะคนรับผิดชอบงานเท่านั้นที่ส่งงานนี้ได้");
 
   if (!task.approverId) {
     // No approver required — submitting completes the task directly.
@@ -20,7 +20,13 @@ export async function submitTask(taskId: string, actorId: string) {
   return prisma.$transaction(async (tx) => {
     const updated = await tx.task.update({
       where: { id: taskId },
-      data: { status: "REVIEW", submittedAt: new Date() },
+      data: {
+        status: "REVIEW",
+        submittedAt: new Date(),
+        blockedReason: null,
+        blockedNote: null,
+        blockedAt: null,
+      },
     });
 
     await tx.approval.create({
@@ -131,7 +137,7 @@ export async function requestRevision(taskId: string, approverId: string, commen
 
 export async function resumeAfterRevision(taskId: string, actorId: string) {
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-  if (task.ownerId !== actorId) throw new ForbiddenError("เฉพาะเจ้าของงานเท่านั้นที่ดำเนินงานนี้ต่อได้");
+  if (task.ownerId !== actorId) throw new ForbiddenError("เฉพาะคนรับผิดชอบงานเท่านั้นที่ดำเนินงานนี้ต่อได้");
   assertTransition(task.status, "IN_PROGRESS");
 
   return prisma.task.update({ where: { id: taskId }, data: { status: "IN_PROGRESS" } });

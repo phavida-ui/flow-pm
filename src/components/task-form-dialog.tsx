@@ -85,7 +85,7 @@ export function TaskFormDialog({
           </label>
 
           <label className="grid gap-1.5">
-            <span className="text-[10px] font-extrabold text-[#59677a]">เจ้าของ</span>
+            <span className="text-[10px] font-extrabold text-[#59677a]">คนรับผิดชอบ</span>
             {lockOwnerTo ? (
               <>
                 <input type="hidden" name="ownerId" value={lockOwnerTo.id} />

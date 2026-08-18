@@ -6,9 +6,9 @@ import { PageHeader } from "@/components/page-header";
 import { StartCampaignButton } from "@/components/start-campaign-button";
 
 const CHECK_LABELS: Record<string, string> = {
-  hasOwner: "แคมเปญมีเจ้าของ",
+  hasOwner: "แคมเปญมีคนรับผิดชอบ",
   hasTargetDate: "แคมเปญมีวันเป้าหมาย",
-  allTasksHaveOwner: "งานทุกงานมีเจ้าของ",
+  allTasksHaveOwner: "งานทุกงานมีคนรับผิดชอบ",
   allTasksHaveDueDate: "งานทุกงานมีกำหนดส่ง",
   noDependencyCycles: "ไม่พบการพึ่งพากันแบบวนลูป",
   atLeastOneStartable: "มีอย่างน้อยหนึ่งงานที่เริ่มได้",

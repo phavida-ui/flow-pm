@@ -61,6 +61,13 @@ enum SubtaskStatus {
   DONE
 }
 
+enum TaskBlockedReason {
+  WAITING_PERSON
+  WAITING_ANSWER
+  WAITING_FILE
+  OTHER
+}
+
 enum NotificationType {
   TASK_ASSIGNED
   TASK_READY
@@ -231,25 +238,28 @@ model WorkflowTemplateDependency {
 // ---------- Task ----------
 
 model Task {
-  id             String        @id @default(cuid())
-  campaignId     String
+  id             String             @id @default(cuid())
+  campaignId     String?
   templateTaskId String?
   name           String
   description    String?
   teamId         String?
   ownerId        String?
   approverId     String?
-  status         TaskStatus    @default(PLANNED)
+  status         TaskStatus         @default(PLANNED)
   priority       TaskPriority?
+  blockedReason  TaskBlockedReason?
+  blockedNote    String?
+  blockedAt      DateTime?
   dueDate        DateTime?
   startedAt      DateTime?
   submittedAt    DateTime?
   completedAt    DateTime?
   createdBy      String
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 
-  campaign     Campaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaign     Campaign?             @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   templateTask WorkflowTemplateTask? @relation(fields: [templateTaskId], references: [id])
   team         Team?                 @relation(fields: [teamId], references: [id])
   owner        User?                 @relation("TaskOwner", fields: [ownerId], references: [id])
@@ -367,14 +377,14 @@ model Notification {
 
 model ActivityLog {
   id           String            @id @default(cuid())
-  campaignId   String
+  campaignId   String?
   taskId       String?
   actorId      String?
   eventType    ActivityEventType
   metadataJson Json?
   createdAt    DateTime          @default(now())
 
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   task     Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
   actor    User?    @relation(fields: [actorId], references: [id])
 

@@ -13,8 +13,16 @@ export async function notify(
     taskId?: string | null;
     title: string;
     message: string;
+    dedupe?: boolean;
   }
 ) {
+  if (params.dedupe) {
+    const existing = await db.notification.findFirst({
+      where: { userId: params.userId, type: params.type, taskId: params.taskId ?? undefined, isRead: false },
+    });
+    if (existing) return existing;
+  }
+
   return db.notification.create({
     data: {
       userId: params.userId,

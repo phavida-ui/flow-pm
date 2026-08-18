@@ -16,10 +16,10 @@ async function assertPlanningEditable(campaignId: string) {
   return campaign;
 }
 
-export async function createTaskAction(campaignId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function createTaskAction(campaignId: string | null, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser();
   try {
-    await assertPlanningEditable(campaignId);
+    if (campaignId) await assertPlanningEditable(campaignId);
 
     const name = String(formData.get("name") ?? "").trim();
     if (!name) return { error: "กรุณากรอกชื่องาน" };
@@ -40,7 +40,7 @@ export async function createTaskAction(campaignId: string, _prev: ActionState, f
       createdBy: user.id,
     });
 
-    if (dependsOn) {
+    if (dependsOn && campaignId) {
       await dependencyService.addDependency(campaignId, task.id, dependsOn);
     }
   } catch (err) {
@@ -48,7 +48,40 @@ export async function createTaskAction(campaignId: string, _prev: ActionState, f
     throw err;
   }
 
-  revalidatePath(`/campaigns/${campaignId}`);
+  if (campaignId) revalidatePath(`/campaigns/${campaignId}`);
+  revalidatePath("/my-work");
+  return undefined;
+}
+
+export async function quickAddTaskAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await requireUser();
+  const name = String(formData.get("title") ?? "").trim();
+  if (!name) return { error: "กรุณากรอกชื่องาน" };
+
+  const campaignId = formData.get("campaignId") ? String(formData.get("campaignId")) : null;
+  if (campaignId) await assertPlanningEditable(campaignId);
+
+  const priorityRaw = formData.get("priority") ? String(formData.get("priority")) : null;
+  const dueDateRaw = formData.get("dueDate") ? String(formData.get("dueDate")) : null;
+  const description = formData.get("description") ? String(formData.get("description")) : undefined;
+
+  try {
+    await taskService.createTask({
+      campaignId,
+      name,
+      description,
+      ownerId: formData.get("ownerId") ? String(formData.get("ownerId")) : user.id,
+      dueDate: dueDateRaw ? new Date(dueDateRaw) : null,
+      priority: (priorityRaw as "LOW" | "MEDIUM" | "HIGH" | "URGENT" | null) || null,
+      createdBy: user.id,
+    });
+  } catch (err) {
+    if (err instanceof Error) return { error: err.message };
+    throw err;
+  }
+
+  revalidatePath("/my-work");
+  if (campaignId) revalidatePath(`/campaigns/${campaignId}`);
   return undefined;
 }
 
@@ -95,7 +128,7 @@ export async function removeDependencyAction(dependencyId: string, campaignId: s
   revalidatePath(`/tasks/${taskId}`);
 }
 
-export async function startTaskAction(taskId: string, campaignId: string): Promise<ActionState> {
+export async function startTaskAction(taskId: string, campaignId: string | null): Promise<ActionState> {
   const user = await requireUser();
   try {
     await taskService.startTask(taskId, user.id);
@@ -104,23 +137,23 @@ export async function startTaskAction(taskId: string, campaignId: string): Promi
     throw err;
   }
   revalidatePath(`/tasks/${taskId}`);
-  revalidatePath(`/campaigns/${campaignId}`);
+  if (campaignId) revalidatePath(`/campaigns/${campaignId}`);
   revalidatePath("/my-work");
 }
 
 export async function reassignTaskAction(
   taskId: string,
-  campaignId: string,
+  campaignId: string | null,
   changes: { ownerId?: string | null; approverId?: string | null }
 ) {
   const user = await requireUser();
   if (!isManagerOrAdmin(user)) throw new ForbiddenError("เฉพาะผู้จัดการหรือผู้ดูแลระบบเท่านั้นที่มอบหมายงานใหม่ได้");
   await taskService.reassignTask(taskId, user.id, changes);
   revalidatePath(`/tasks/${taskId}`);
-  revalidatePath(`/campaigns/${campaignId}`);
+  if (campaignId) revalidatePath(`/campaigns/${campaignId}`);
 }
 
-export async function addCommentAction(taskId: string, campaignId: string, body: string) {
+export async function addCommentAction(taskId: string, campaignId: string | null, body: string) {
   const user = await requireUser();
   if (!body.trim()) return;
   await prisma.comment.create({ data: { taskId, userId: user.id, body: body.trim() } });

@@ -18,7 +18,7 @@ export function TaskCard({
     status: TaskStatus;
     priority?: TaskPriority | null;
     dueDate: Date | null;
-    campaign: { id: string; name: string };
+    campaign: { id: string; name: string } | null;
     dependents: Dependent[];
   };
 }) {
@@ -33,7 +33,7 @@ export function TaskCard({
       <div>
         <div className="text-[13px] font-extrabold">{task.name}</div>
         <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-muted">
-          <span>{task.campaign.name}</span>
+          <span>{task.campaign?.name ?? "งานเดี่ยว"}</span>
           {task.dueDate && (
             <span className={clsx(overdue && "font-bold text-red")}>
               {overdue ? "เกินกำหนด · " : "กำหนดส่ง "}

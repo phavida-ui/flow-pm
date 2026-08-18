@@ -8,6 +8,7 @@ import {
 } from "@/server/services/dependency.service";
 import { logActivity } from "@/server/services/activity.service";
 import { notify } from "@/server/services/notification.service";
+import { toSimpleStatus, SIMPLE_STATUS_ORDER, type SimpleStatus } from "@/lib/task-status";
 
 export async function createCampaign(params: {
   name: string;
@@ -190,6 +191,7 @@ export async function startCampaign(campaignId: string, actorId: string) {
           taskId: task.id,
           title: "พร้อมเริ่มงาน",
           message: `"${task.name}" พร้อมแล้ว — เริ่มได้เลยตอนนี้`,
+          dedupe: true,
         });
       }
     }
@@ -261,7 +263,16 @@ export async function getCampaignDetail(campaignId: string) {
   const completed = campaign.tasks.filter((t) => t.status === "COMPLETED").length;
   const holders = await getCampaignHolders(campaignId);
 
-  return { campaign, progress: { completed, total }, ...holders };
+  const statusBreakdown = SIMPLE_STATUS_ORDER.reduce((acc, key) => {
+    acc[key] = 0;
+    return acc;
+  }, {} as Record<SimpleStatus, number>);
+  for (const t of campaign.tasks) {
+    const simple = toSimpleStatus(t);
+    if (simple) statusBreakdown[simple]++;
+  }
+
+  return { campaign, progress: { completed, total }, statusBreakdown, ...holders };
 }
 
 export async function getCampaignHolders(campaignId: string) {

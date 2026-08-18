@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { CampaignStatusBadge } from "@/components/campaign-status-badge";
 import { CampaignTabs } from "@/components/campaign-tabs";
 import { formatDue } from "@/lib/format";
+import { SIMPLE_STATUS_LABELS, SIMPLE_STATUS_ORDER } from "@/lib/task-status";
 import Link from "next/link";
 
 export default async function CampaignLayout({
@@ -24,9 +25,12 @@ export default async function CampaignLayout({
     notFound();
   }
 
-  const { campaign, progress, currentWork, waitingApproval } = detail;
+  const { campaign, progress, currentWork, waitingApproval, statusBreakdown } = detail;
   const pct = progress.total ? Math.round((progress.completed / progress.total) * 100) : 0;
   const canManage = isManagerOrAdmin(user);
+  const summaryLine = SIMPLE_STATUS_ORDER.filter((s) => statusBreakdown[s] > 0)
+    .map((s) => `${statusBreakdown[s]} ${SIMPLE_STATUS_LABELS[s]}`)
+    .join(" · ");
 
   return (
     <div>
@@ -49,7 +53,7 @@ export default async function CampaignLayout({
         <div>
           <div className="mb-2 flex items-center gap-2">
             <CampaignStatusBadge status={campaign.status} />
-            <span className="text-[10px] text-muted">เจ้าของ: {campaign.owner.name}</span>
+            <span className="text-[10px] text-muted">คนรับผิดชอบ: {campaign.owner.name}</span>
           </div>
           <div className="flex justify-between text-[10px] font-bold text-muted">
             <span>ความคืบหน้า</span>
@@ -60,6 +64,7 @@ export default async function CampaignLayout({
           <div className="mt-2 h-[7px] overflow-hidden rounded-full bg-[#edf1f4]">
             <span className="block h-full rounded-full bg-primary-strong" style={{ width: `${pct}%` }} />
           </div>
+          {summaryLine && <div className="mt-2 text-[10px] font-semibold text-muted">{summaryLine}</div>}
         </div>
 
         <div>

@@ -9,7 +9,7 @@ export type ActionState = { error?: string } | undefined;
 
 export async function createSubtaskAction(
   taskId: string,
-  campaignId: string,
+  campaignId: string | null,
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
@@ -24,7 +24,7 @@ export async function createSubtaskAction(
   await subtaskService.createSubtask({ taskId, title, assigneeId, priority, createdBy: user.id });
 
   revalidatePath(`/tasks/${taskId}`);
-  revalidatePath(`/campaigns/${campaignId}`);
+  if (campaignId) revalidatePath(`/campaigns/${campaignId}`);
   return undefined;
 }
 

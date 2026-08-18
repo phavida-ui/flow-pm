@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Search, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
+import { SimpleStatusBadge } from "@/components/simple-status-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { deleteTaskAction } from "@/app/actions/task";
 import { formatDue } from "@/lib/format";
+import { toSimpleStatus, SIMPLE_STATUS_ORDER } from "@/lib/task-status";
 import type { TaskStatus, TaskPriority } from "@prisma/client";
 
 type Option = { id: string; name: string };
@@ -22,6 +24,98 @@ type Row = {
   approver: { id: string; name: string } | null;
   dependsOn: { id: string; dependsOnTask: { id: string; name: string } }[];
 };
+
+function TaskTable({
+  rows,
+  campaignId,
+  campaignEditable,
+  teams,
+  users,
+}: {
+  rows: Row[];
+  campaignId: string;
+  campaignEditable: boolean;
+  teams: Option[];
+  users: Option[];
+}) {
+  return (
+    <div className="overflow-x-auto rounded-[17px] border border-line bg-white">
+      <table className="w-full min-w-[900px] border-collapse text-[11px]">
+        <thead>
+          <tr className="border-b border-line text-left text-[9px] font-extrabold uppercase tracking-wide text-muted">
+            <th className="px-4 py-3">งาน</th>
+            <th className="px-4 py-3">คนรับผิดชอบ</th>
+            <th className="px-4 py-3">ทีม</th>
+            <th className="px-4 py-3">ผู้อนุมัติ</th>
+            <th className="px-4 py-3">กำหนดส่ง</th>
+            <th className="px-4 py-3">ขึ้นอยู่กับ</th>
+            <th className="px-4 py-3">ความสำคัญ</th>
+            <th className="px-4 py-3">สถานะ</th>
+            <th className="px-4 py-3" />
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((t) => (
+            <tr key={t.id} className="border-b border-[#f0f3f6] last:border-b-0 hover:bg-[#f9fbfd]">
+              <td className="px-4 py-3 font-bold">
+                <Link href={`/tasks/${t.id}`} className="hover:text-primary-strong">
+                  {t.name}
+                </Link>
+              </td>
+              <td className="px-4 py-3">{t.owner?.name ?? "—"}</td>
+              <td className="px-4 py-3 text-muted">{t.team?.name ?? "—"}</td>
+              <td className="px-4 py-3 text-muted">{t.approver?.name ?? "—"}</td>
+              <td className="px-4 py-3 text-muted">{t.dueDate ? formatDue(t.dueDate) : "—"}</td>
+              <td className="px-4 py-3 text-muted">
+                {t.dependsOn.length ? t.dependsOn.map((d) => d.dependsOnTask.name).join(", ") : "—"}
+              </td>
+              <td className="px-4 py-3">
+                <PriorityBadge priority={t.priority} />
+              </td>
+              <td className="px-4 py-3">
+                <StatusBadge status={t.status} />
+              </td>
+              <td className="px-4 py-3">
+                {campaignEditable && t.status === "PLANNED" && (
+                  <div className="flex justify-end gap-1.5">
+                    <TaskFormDialog
+                      mode="edit"
+                      campaignId={campaignId}
+                      teams={teams}
+                      users={users}
+                      dependencyOptions={[]}
+                      task={{
+                        id: t.id,
+                        name: t.name,
+                        teamId: t.team?.id ?? null,
+                        ownerId: t.owner?.id ?? null,
+                        approverId: t.approver?.id ?? null,
+                        dueDate: t.dueDate,
+                        priority: t.priority,
+                      }}
+                    />
+                    <form action={deleteTaskAction.bind(null, t.id, campaignId)}>
+                      <button className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft" aria-label="ลบงาน">
+                        <Trash2 size={13} />
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={9} className="px-4 py-10 text-center text-muted">
+                ไม่มีงานที่ตรงกับตัวกรองนี้
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export function PlanningBoard({
   campaignId,
@@ -72,7 +166,7 @@ export function PlanningBoard({
           ))}
         </select>
         <select value={ownerFilter} onChange={(e) => setOwnerFilter(e.target.value)} className="h-10 rounded-[11px] border border-line bg-white px-3 text-[11px]">
-          <option value="">ทุกเจ้าของ</option>
+          <option value="">ทุกคน</option>
           {users.map((u) => (
             <option key={u.id} value={u.id}>
               {u.name}
@@ -101,81 +195,43 @@ export function PlanningBoard({
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-[17px] border border-line bg-white">
-        <table className="w-full min-w-[900px] border-collapse text-[11px]">
-          <thead>
-            <tr className="border-b border-line text-left text-[9px] font-extrabold uppercase tracking-wide text-muted">
-              <th className="px-4 py-3">งาน</th>
-              <th className="px-4 py-3">เจ้าของ</th>
-              <th className="px-4 py-3">ทีม</th>
-              <th className="px-4 py-3">ผู้อนุมัติ</th>
-              <th className="px-4 py-3">กำหนดส่ง</th>
-              <th className="px-4 py-3">ขึ้นอยู่กับ</th>
-              <th className="px-4 py-3">ความสำคัญ</th>
-              <th className="px-4 py-3">สถานะ</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((t) => (
-              <tr key={t.id} className="border-b border-[#f0f3f6] last:border-b-0 hover:bg-[#f9fbfd]">
-                <td className="px-4 py-3 font-bold">
-                  <Link href={`/tasks/${t.id}`} className="hover:text-primary-strong">
-                    {t.name}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">{t.owner?.name ?? "—"}</td>
-                <td className="px-4 py-3 text-muted">{t.team?.name ?? "—"}</td>
-                <td className="px-4 py-3 text-muted">{t.approver?.name ?? "—"}</td>
-                <td className="px-4 py-3 text-muted">{t.dueDate ? formatDue(t.dueDate) : "—"}</td>
-                <td className="px-4 py-3 text-muted">
-                  {t.dependsOn.length ? t.dependsOn.map((d) => d.dependsOnTask.name).join(", ") : "—"}
-                </td>
-                <td className="px-4 py-3">
-                  <PriorityBadge priority={t.priority} />
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={t.status} />
-                </td>
-                <td className="px-4 py-3">
-                  {campaignEditable && t.status === "PLANNED" && (
-                    <div className="flex justify-end gap-1.5">
-                      <TaskFormDialog
-                        mode="edit"
-                        campaignId={campaignId}
-                        teams={teams}
-                        users={users}
-                        dependencyOptions={[]}
-                        task={{
-                          id: t.id,
-                          name: t.name,
-                          teamId: t.team?.id ?? null,
-                          ownerId: t.owner?.id ?? null,
-                          approverId: t.approver?.id ?? null,
-                          dueDate: t.dueDate,
-                          priority: t.priority,
-                        }}
-                      />
-                      <form action={deleteTaskAction.bind(null, t.id, campaignId)}>
-                        <button className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft" aria-label="ลบงาน">
-                          <Trash2 size={13} />
-                        </button>
-                      </form>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-muted">
-                  ไม่มีงานที่ตรงกับตัวกรองนี้
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {campaignEditable ? (
+        <TaskTable rows={filtered} campaignId={campaignId} campaignEditable={campaignEditable} teams={teams} users={users} />
+      ) : (
+        <div className="grid gap-5">
+          {SIMPLE_STATUS_ORDER.map((simple) => {
+            const rows = filtered.filter((t) => toSimpleStatus(t) === simple);
+            if (rows.length === 0) return null;
+            return (
+              <div key={simple} className="grid gap-2.5">
+                <div className="flex items-center gap-2">
+                  <SimpleStatusBadge status={simple} />
+                  <span className="text-[10px] font-bold text-muted">{rows.length} งาน</span>
+                </div>
+                <TaskTable rows={rows} campaignId={campaignId} campaignEditable={campaignEditable} teams={teams} users={users} />
+              </div>
+            );
+          })}
+          {(() => {
+            const notStarted = filtered.filter((t) => t.status === "PLANNED");
+            if (notStarted.length === 0) return null;
+            return (
+              <div className="grid gap-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center rounded-lg bg-[#edf1f5] px-2 py-1 text-[9px] font-extrabold uppercase tracking-wide text-[#6f7b8d]">
+                    ยังไม่เริ่ม
+                  </span>
+                  <span className="text-[10px] font-bold text-muted">{notStarted.length} งาน</span>
+                </div>
+                <TaskTable rows={notStarted} campaignId={campaignId} campaignEditable={campaignEditable} teams={teams} users={users} />
+              </div>
+            );
+          })()}
+          {filtered.length === 0 && (
+            <TaskTable rows={[]} campaignId={campaignId} campaignEditable={campaignEditable} teams={teams} users={users} />
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -13,7 +13,7 @@ export function ReassignControls({
   users,
 }: {
   taskId: string;
-  campaignId: string;
+  campaignId: string | null;
   ownerId: string | null;
   approverId: string | null;
   users: Option[];
@@ -23,7 +23,7 @@ export function ReassignControls({
   return (
     <div className="grid grid-cols-2 gap-3">
       <label className="grid gap-1.5">
-        <span className="text-[9px] font-extrabold text-muted">เจ้าของ</span>
+        <span className="text-[9px] font-extrabold text-muted">คนรับผิดชอบ</span>
         <select
           defaultValue={ownerId ?? ""}
           disabled={pending}

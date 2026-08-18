@@ -23,7 +23,7 @@ export default async function ApprovalsPage() {
             <div key={t.id} className="grid gap-3 rounded-[18px] border border-line bg-white p-5">
               <div>
                 <h3 className="text-[15px] font-extrabold">{t.name}</h3>
-                <p className="mt-1 text-[11px] text-muted">{t.campaign.name}</p>
+                <p className="mt-1 text-[11px] text-muted">{t.campaign?.name ?? "งานเดี่ยว"}</p>
               </div>
 
               <div className="flex items-center gap-2.5">
