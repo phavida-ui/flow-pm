@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FLOW — งานของทีมที่ทุกคนเข้าใจง่าย</title>
+  <style>
+
+:root{
+  --bg:#f7f9fc;
+  --surface:#fff;
+  --line:#e8edf3;
+  --text:#1d2a3b;
+  --muted:#7f8b9d;
+  --primary:#89c8f5;
+  --primary-strong:#4da7e8;
+  --primary-soft:#eef8ff;
+  --green:#2e9b68;
+  --green-soft:#ebf8f1;
+  --orange:#c9882a;
+  --orange-soft:#fff5e3;
+  --red:#cf5858;
+  --red-soft:#fff0f0;
+  --shadow:0 18px 55px rgba(27,48,80,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,"Noto Sans Thai",system-ui,-apple-system,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.sidebar{
+  width:232px;position:fixed;inset:0 auto 0 0;background:#fff;border-right:1px solid var(--line);
+  padding:22px 16px;display:flex;flex-direction:column;z-index:20
+}
+.brand{display:flex;gap:11px;align-items:center;padding:0 8px 30px}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:var(--primary);display:grid;place-items:center;font-weight:900;color:#20445f}
+.brand-copy{display:grid;gap:2px}
+.brand-copy strong{font-size:15px;letter-spacing:.08em}
+.brand-copy span{font-size:10px;color:var(--muted)}
+.nav{display:grid;gap:6px}
+.nav-item{
+  border:0;background:transparent;border-radius:13px;padding:12px;display:grid;grid-template-columns:26px 1fr auto;
+  align-items:center;text-align:left;color:#667486;font-weight:700;font-size:13px
+}
+.nav-item:hover{background:#f7fafc}
+.nav-item.active{background:var(--primary-soft);color:#287eba}
+.nav-icon{font-size:17px}
+.nav-badge{font-size:10px;padding:3px 7px;border-radius:20px;background:#edf1f5;color:#718094}
+.nav-badge.danger{background:var(--red-soft);color:#bc4e4e}
+.sidebar-bottom{margin-top:auto;display:grid;gap:6px}
+.me-card{border-top:1px solid var(--line);padding:18px 8px 0;display:flex;gap:10px;align-items:center}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;flex:0 0 auto}
+.avatar.jane{background:#e9f5fe;color:#287eb9}
+.avatar.ploy{background:#f1edff;color:#6657c6}
+.avatar.nan{background:#fff0ea;color:#bd6636}
+.avatar.golf{background:#eaf8f1;color:#2c865d}
+.avatar.beam{background:#fff5df;color:#a56e16}
+.avatar.lead{background:#f0f2f5;color:#667386}
+.me-copy{display:grid;gap:2px}
+.me-copy strong{font-size:12px}
+.me-copy span{font-size:10px;color:var(--muted)}
+
+.main{margin-left:232px;min-height:100vh;padding:0 34px 60px}
+.topbar{
+  height:98px;display:flex;align-items:center;justify-content:space-between;gap:20px;
+  border-bottom:1px solid var(--line);margin-bottom:26px;position:sticky;top:0;background:rgba(247,249,252,.94);backdrop-filter:blur(10px);z-index:10
+}
+.eyebrow{font-size:10px;letter-spacing:.09em;color:#98a3b3;font-weight:800}
+h1{margin:6px 0 0;font-size:27px;letter-spacing:-.035em}
+h2{margin:5px 0 0;font-size:20px;letter-spacing:-.025em}
+.top-actions{display:flex;gap:9px}
+.btn{height:40px;border-radius:11px;padding:0 15px;border:1px solid var(--line);background:#fff;color:#536174;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.primary{background:var(--primary);border-color:#78bff0;color:#173f5c}
+.btn.primary:hover{background:#78bff0}
+.btn.light:hover{background:#f7fafc}
+.btn.success{background:var(--green-soft);border-color:#cbe9d9;color:#267d57}
+.btn.danger{background:var(--red-soft);border-color:#f0d5d5;color:#b14a4a}
+.btn.block{width:100%}
+.btn.big{height:46px;font-size:13px;padding:0 20px}
+.icon-btn{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:10px;color:#6f7b8d;font-size:18px}
+.view{display:none;animation:fade .18s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.welcome{margin-bottom:18px}
+.welcome h2{font-size:18px}
+.welcome p{font-size:12px;color:var(--muted);margin:6px 0 0}
+
+.focus-card{
+  background:linear-gradient(135deg,#ffffff 0%,#f0f9ff 100%);border:1px solid #dcecf7;border-radius:20px;padding:22px;
+  box-shadow:0 10px 30px rgba(46,99,140,.06);margin-bottom:18px
+}
+.focus-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.focus-kicker{font-size:11px;font-weight:850;color:#2b83bf;text-transform:uppercase;letter-spacing:.06em}
+.focus-title{font-size:25px;font-weight:850;letter-spacing:-.035em;margin-top:7px}
+.focus-sub{font-size:12px;color:var(--muted);margin-top:7px}
+.focus-owner{display:flex;align-items:center;gap:8px;font-size:12px}
+.focus-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:18px}
+.focus-info{background:rgba(255,255,255,.78);border:1px solid var(--line);border-radius:13px;padding:12px}
+.focus-info span{display:block;font-size:10px;color:var(--muted);margin-bottom:4px}
+.focus-info strong{font-size:12px}
+.focus-actions{display:flex;gap:9px;margin-top:18px;align-items:center}
+.focus-note{font-size:11px;color:#68778b}
+.next-person{font-weight:800;color:#a86c1a}
+
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.summary-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}
+.summary-card .num{font-size:22px;font-weight:850;margin-top:6px}
+.summary-card span{font-size:10px;color:var(--muted);font-weight:700}
+
+.two-col{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:16px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden}
+.panel-head{padding:17px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.panel-head h3{font-size:14px;margin:0}
+.panel-head p{font-size:10px;color:var(--muted);margin:3px 0 0}
+.panel-body{padding:10px 12px}
+
+.simple-task{
+  border-bottom:1px solid #f0f3f6;padding:13px 10px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;border-radius:10px
+}
+.simple-task:last-child{border-bottom:0}
+.simple-task:hover{background:#f9fbfd}
+.task-title{font-size:13px;font-weight:800}
+.task-meta{font-size:10px;color:var(--muted);margin-top:5px;display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:9px;padding:4px 7px;border-radius:7px;font-weight:800}
+.tag.ready{background:var(--primary-soft);color:#2a81bc}
+.tag.doing{background:#f0efff;color:#6659c8}
+.tag.wait{background:#f0f2f5;color:#6f7b8d}
+.tag.review{background:var(--orange-soft);color:#9b6517}
+.tag.done{background:var(--green-soft);color:#27845a}
+.task-side{text-align:right}
+.task-side strong{font-size:11px}
+.task-side span{font-size:9px;color:var(--muted);display:block;margin-top:3px}
+
+.wait-card{border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:9px}
+.wait-card:last-child{margin-bottom:0}
+.wait-head{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.wait-head strong{font-size:12px}
+.wait-card p{font-size:10px;color:var(--muted);line-height:1.55;margin:7px 0 0}
+.wait-person{display:flex;align-items:center;gap:7px;font-size:11px}
+
+.campaign-top{
+  display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:16px;
+  background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px
+}
+.campaign-title{display:flex;gap:12px;align-items:center}
+.campaign-icon{width:46px;height:46px;border-radius:14px;background:#eef8ff;display:grid;place-items:center;font-size:21px}
+.campaign-title h2{font-size:19px}
+.campaign-title p{font-size:11px;color:var(--muted);margin:5px 0 0}
+.progress-wrap{min-width:230px}
+.progress-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:700}
+.progress{height:7px;background:#edf1f4;border-radius:20px;overflow:hidden;margin-top:8px}
+.progress span{display:block;height:100%;width:56%;background:var(--primary-strong);border-radius:20px}
+
+.planning-guide{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px
+}
+.guide-step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;gap:10px;align-items:flex-start}
+.guide-step.active{border-color:#c7e6fa;background:#f7fcff}
+.guide-num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#eff2f5;font-size:10px;font-weight:900}
+.guide-step.active .guide-num{background:var(--primary);color:#16405d}
+.guide-step strong{font-size:11px;display:block}
+.guide-step span{font-size:9px;color:var(--muted);display:block;margin-top:3px;line-height:1.4}
+
+.team-flow{background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px}
+.team-flow-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.team-flow-head h3{font-size:14px;margin:0}
+.team-flow-head p{font-size:10px;color:var(--muted);margin:4px 0 0}
+.flow-list{display:grid;gap:0}
+.flow-item{display:grid;grid-template-columns:38px 1fr;gap:12px;position:relative;padding-bottom:16px}
+.flow-item:not(:last-child):before{content:"";position:absolute;left:18px;top:37px;bottom:-1px;width:2px;background:#e8edf2}
+.flow-dot{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#f0f2f5;color:#728093;font-size:11px;font-weight:900;z-index:1}
+.flow-dot.done{background:var(--green-soft);color:var(--green)}
+.flow-dot.now{background:var(--primary-soft);color:#2d82bd;border:2px solid #aed8f5}
+.flow-card{border:1px solid var(--line);border-radius:13px;padding:13px 14px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.flow-card:hover{background:#fbfcfe}
+.flow-main strong{font-size:12px}
+.flow-main .meta{font-size:9px;color:var(--muted);margin-top:5px;display:flex;gap:8px;flex-wrap:wrap}
+.flow-right{text-align:right}
+.flow-right .who{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700}
+.flow-right .hint{font-size:9px;color:#a36b1c;margin-top:5px;font-weight:800}
+.parallel-note{margin:-3px 0 12px 50px;padding:9px 11px;border-radius:10px;background:#fafbfc;border:1px dashed #dfe5eb;font-size:9px;color:#758195}
+
+.approval-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;max-width:760px}
+.approval-card h2{font-size:20px}
+.approval-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;color:var(--muted);margin-top:8px}
+.preview-box{margin-top:18px;border:1px solid var(--line);background:#fafbfc;border-radius:14px;padding:14px}
+.preview-box strong{font-size:11px}
+.preview-box p{font-size:10px;color:var(--muted);line-height:1.55}
+.approval-question{font-size:14px;font-weight:850;margin-top:18px}
+.approval-actions{display:flex;gap:9px;margin-top:12px}
+
+.drawer{
+  position:fixed;top:0;right:-560px;width:min(560px,100vw);height:100vh;background:#fff;border-left:1px solid var(--line);z-index:60;
+  box-shadow:-20px 0 50px rgba(26,44,69,.12);transition:right .22s ease;overflow:auto
+}
+.drawer.small{width:min(420px,100vw)}
+.drawer.open{right:0}
+.drawer-head{height:84px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:18px 20px;position:sticky;top:0;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);z-index:2}
+.drawer-section{padding:18px 20px;border-bottom:1px solid var(--line)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-box{border:1px solid var(--line);border-radius:12px;padding:11px}
+.info-box span{font-size:9px;color:var(--muted);display:block;margin-bottom:4px}
+.info-box strong{font-size:11px}
+.story-card{border-radius:13px;border:1px solid var(--line);padding:12px;margin-bottom:9px}
+.story-card.current{border-color:#c5e4f9;background:#f7fcff}
+.story-label{font-size:9px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.story-main{display:flex;align-items:center;gap:8px;margin-top:7px}
+.story-main strong{font-size:11px;display:block}
+.story-main span{font-size:9px;color:var(--muted)}
+.story-message{font-size:10px;color:#9a661c;background:var(--orange-soft);border-radius:8px;padding:7px 9px;margin-top:8px;font-weight:700}
+.drawer-actions{position:sticky;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);padding:15px 20px;display:flex;gap:9px}
+.drawer-actions .btn{flex:1}
+
+.notification{display:grid;grid-template-columns:32px 1fr;gap:10px;padding:14px 17px;border-bottom:1px solid #eef2f5}
+.notif-icon{width:31px;height:31px;border-radius:9px;background:var(--primary-soft);display:grid;place-items:center;color:#2c82bd}
+.notification strong{font-size:11px}
+.notification p{font-size:9px;color:var(--muted);line-height:1.5;margin:4px 0 0}
+.notification time{font-size:8px;color:#a5afbc;display:block;margin-top:5px}
+
+.modal-backdrop{position:fixed;inset:0;background:rgba(16,28,44,.26);display:none;align-items:center;justify-content:center;padding:18px;z-index:80}
+.modal-backdrop.open{display:flex}
+.modal{background:#fff;border-radius:18px;width:min(560px,100%);box-shadow:var(--shadow)}
+.modal.help{width:min(500px,100%)}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.form{padding:20px;display:grid;gap:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:grid;gap:7px}
+.field span{font-size:10px;color:#59677a;font-weight:800}
+.field input,.field select{height:41px;border:1px solid var(--line);border-radius:10px;padding:0 11px;outline:0;background:#fff;font-size:11px;color:var(--text)}
+.field input:focus,.field select:focus{border-color:#97cef3;box-shadow:0 0 0 3px #eef8ff}
+.hint-box{border:1px solid #d8ebf9;background:#f5fbff;border-radius:10px;padding:10px 11px;font-size:9px;color:#52728a}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.help-steps{padding:20px;display:grid;gap:12px}
+.help-step{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px}
+.help-step>b{width:26px;height:26px;border-radius:50%;background:var(--primary-soft);display:grid;place-items:center;color:#2e82bb;font-size:10px}
+.help-step strong{font-size:11px;display:block}
+.help-step span{font-size:9px;color:var(--muted);display:block;margin-top:4px;line-height:1.5}
+
+.toast{position:fixed;right:22px;bottom:22px;background:#223147;color:#fff;border-radius:11px;padding:11px 14px;font-size:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(8px);transition:.18s;pointer-events:none;z-index:100}
+.toast.show{opacity:1;transform:none}
+
+@media(max-width:1000px){
+  .sidebar{width:76px;padding:22px 12px}
+  .brand-copy,.nav-label,.nav-badge,.me-copy{display:none}
+  .brand{padding-left:7px}
+  .nav-item{grid-template-columns:1fr;place-items:center}
+  .me-card{justify-content:center}
+  .main{margin-left:76px}
+}
+@media(max-width:800px){
+  .main{padding:0 18px 40px}
+  .topbar{height:auto;padding:18px 0;align-items:flex-start}
+  .summary-row{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+  .focus-grid,.planning-guide{grid-template-columns:1fr}
+  .focus-head,.campaign-top{display:block}
+  .focus-owner,.progress-wrap{margin-top:14px}
+  .form-row{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .sidebar{inset:auto 0 0 0;width:100%;height:64px;border-right:0;border-top:1px solid var(--line);padding:7px 10px}
+  .brand,.sidebar-bottom{display:none}
+  .nav{grid-template-columns:repeat(3,1fr)}
+  .nav-item{padding:7px 3px;gap:2px}
+  .nav-label{display:block;font-size:9px}
+  .main{margin-left:0;padding:0 14px 82px}
+  .top-actions .light{display:none}
+  .focus-title{font-size:22px}
+  .focus-actions{display:grid}
+  .summary-row{grid-template-columns:1fr 1fr}
+}
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">F</div>
+        <div class="brand-copy">
+          <strong>FLOW</strong>
+          <span>ทีมเราทำอะไรอยู่</span>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="nav-item active" data-view="home">
+          <span class="nav-icon">⌂</span><span class="nav-label">งานของฉัน</span>
+        </button>
+        <button class="nav-item" data-view="campaign">
+          <span class="nav-icon">◫</span><span class="nav-label">งานของทีม</span>
+        </button>
+        <button class="nav-item" data-view="approval">
+          <span class="nav-icon">✓</span><span class="nav-label">รอฉันอนุมัติ</span><span class="nav-badge" id="approval-badge">1</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button class="nav-item" id="notification-button">
+          <span class="nav-icon">◔</span><span class="nav-label">แจ้งเตือน</span><span class="nav-badge danger" id="notif-badge">3</span>
+        </button>
+        <div class="me-card">
+          <div class="avatar jane">J</div>
+          <div class="me-copy">
+            <strong>Jane</strong>
+            <span>Marketing</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow" id="page-eyebrow">วันนี้ · 17 สิงหาคม 2026</div>
+          <h1 id="page-title">งานของฉัน</h1>
+        </div>
+        <div class="top-actions">
+          <button class="btn light" id="help-btn">? วิธีใช้งาน</button>
+          <button class="btn primary" id="add-task-btn">＋ เพิ่มงานของฉัน</button>
+        </div>
+      </header>
+
+      <section class="view active" id="view-home"></section>
+      <section class="view" id="view-campaign"></section>
+      <section class="view" id="view-approval"></section>
+    </main>
+
+    <aside class="drawer" id="task-drawer">
+      <div class="drawer-head">
+        <div>
+          <div class="eyebrow">รายละเอียดงาน</div>
+          <h2 id="task-drawer-title">Task</h2>
+        </div>
+        <button class="icon-btn close-drawer">×</button>
+      </div>
+      <div id="task-drawer-body"></div>
+    </aside>
+
+    <aside class="drawer small" id="notification-drawer">
+      <div class="drawer-head">
+        <div>
+          <div class="eyebrow">แจ้งเตือน</div>
+          <h2>มีอะไรที่คุณควรรู้</h2>
+        </div>
+        <button class="icon-btn close-drawer">×</button>
+      </div>
+      <div id="notification-list"></div>
+    </aside>
+
+    <div class="modal-backdrop" id="task-modal">
+      <div class="modal">
+        <div class="modal-head">
+          <div>
+            <div class="eyebrow">เพิ่มงาน</div>
+            <h2>งานของคุณใน Campaign นี้คืออะไร?</h2>
+          </div>
+          <button class="icon-btn close-modal">×</button>
+        </div>
+        <form id="task-form" class="form">
+          <label class="field">
+            <span>ชื่องาน</span>
+            <input name="name" required placeholder="เช่น เตรียม Caption สำหรับยิง Ads" />
+          </label>
+          <div class="form-row">
+            <label class="field">
+              <span>ต้องเสร็จเมื่อไหร่</span>
+              <input name="due" type="date" value="2026-08-22" />
+            </label>
+            <label class="field">
+              <span>ใครตรวจงานนี้</span>
+              <select name="approver">
+                <option value="">ไม่ต้องตรวจ</option>
+                <option>Marketing Head</option>
+                <option>Creative Lead</option>
+              </select>
+            </label>
+          </div>
+          <label class="field">
+            <span>ก่อนเริ่มงานนี้ ต้องรออะไรไหม?</span>
+            <select name="depends">
+              <option value="">ไม่ต้องรอ เริ่มได้เลย</option>
+              <option>Creative Brief</option>
+              <option>Video Editing</option>
+              <option>Ads Setup</option>
+            </select>
+          </label>
+          <div class="hint-box">
+            ระบบจะช่วยบอกคนถัดไปให้อัตโนมัติ เมื่อคุณทำงานเสร็จ
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn light close-modal">ยกเลิก</button>
+            <button type="submit" class="btn primary">เพิ่มงานนี้</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="help-modal">
+      <div class="modal help">
+        <div class="modal-head">
+          <div>
+            <div class="eyebrow">วิธีใช้งาน</div>
+            <h2>FLOW ใช้แค่ 3 อย่าง</h2>
+          </div>
+          <button class="icon-btn close-help">×</button>
+        </div>
+        <div class="help-steps">
+          <div class="help-step"><b>1</b><div><strong>ดูงานที่ต้องทำตอนนี้</strong><span>หน้าแรกจะเลือกงานที่ควรทำให้คุณก่อน</span></div></div>
+          <div class="help-step"><b>2</b><div><strong>ทำเสร็จแล้วกดส่งต่อ</strong><span>ถ้าต้อง Approve ระบบจะส่งไปให้คนตรวจเอง</span></div></div>
+          <div class="help-step"><b>3</b><div><strong>ระบบบอกคนถัดไปให้</strong><span>คุณไม่ต้องทักถามว่า “ถึงคิวหรือยัง”</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+  <script>
+
+const state = {
+  currentView: "home",
+  tasks: [
+    {id:1,name:"Landing Page",owner:"Jane",team:"Marketing",due:"21 Aug",status:"READY",approver:"Marketing Head",depends:"Creative Brief",next:"Launch Ads",nextOwner:"Golf"},
+    {id:2,name:"Campaign Launch Checklist",owner:"Jane",team:"Marketing",due:"Today",status:"IN_PROGRESS",approver:"—",depends:"Ads Setup",next:"Launch QA",nextOwner:"Golf"},
+    {id:3,name:"Prepare Tracking",owner:"Beam",team:"Analytics",due:"22 Aug",status:"READY",approver:"—",depends:"Creative Brief",next:"Performance Report",nextOwner:"Beam"},
+    {id:4,name:"Video Editing",owner:"Nan",team:"Creative",due:"21 Aug",status:"IN_PROGRESS",approver:"Creative Lead",depends:"Shooting",next:"Ads Setup",nextOwner:"Golf"},
+    {id:5,name:"Ads Audience",owner:"Golf",team:"Performance",due:"21 Aug",status:"IN_PROGRESS",approver:"—",depends:"Creative Brief",next:"Launch Ads",nextOwner:"Golf"},
+    {id:6,name:"Ads Setup",owner:"Golf",team:"Performance",due:"22 Aug",status:"BLOCKED",approver:"Marketing Head",depends:"Video Editing",next:"Launch Ads",nextOwner:"Golf"},
+    {id:7,name:"Launch Ads",owner:"Golf",team:"Performance",due:"23 Aug",status:"BLOCKED",approver:"—",depends:"Landing Page + Ads Audience + Ads Setup",next:"Performance Report",nextOwner:"Beam"},
+    {id:8,name:"Performance Report",owner:"Beam",team:"Analytics",due:"30 Aug",status:"BLOCKED",approver:"Marketing Head",depends:"Launch Ads + Prepare Tracking",next:"Management Review",nextOwner:"Marketing Head"},
+  ],
+  approvals: [
+    {id:"a1",taskId:4,task:"Video Editing",owner:"Nan",campaign:"Birthday Campaign 2026",due:"21 Aug",file:"birthday-final-v4.mp4",status:"PENDING"}
+  ],
+  notifications: [
+    {icon:"✓",title:"มีงานรอคุณอนุมัติ",body:"Nan ส่ง Video Editing มาให้ตรวจแล้ว",time:"12 นาทีที่แล้ว"},
+    {icon:"→",title:"Landing Page เริ่มได้แล้ว",body:"Creative Brief เสร็จแล้ว งานนี้พร้อมให้คุณเริ่ม",time:"1 ชั่วโมงที่แล้ว"},
+    {icon:"!",title:"งานใกล้ถึงกำหนด",body:"Prepare Tracking ต้องเสร็จภายใน 22 Aug",time:"2 ชั่วโมงที่แล้ว"},
+  ]
+};
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+function avatar(name){
+  const cls = ({Jane:"jane",Ploy:"ploy",Nan:"nan",Golf:"golf",Beam:"beam","Creative Lead":"lead","Marketing Head":"lead"})[name] || "lead";
+  return `<span class="avatar ${cls}">${name.split(" ").map(x=>x[0]).join("").slice(0,2)}</span>`;
+}
+function thaiStatus(status){
+  const map={READY:["เริ่มได้","ready"],IN_PROGRESS:["กำลังทำ","doing"],BLOCKED:["รอคนอื่น","wait"],REVIEW:["รออนุมัติ","review"],COMPLETED:["เสร็จแล้ว","done"],REVISION:["ต้องแก้ไข","review"]};
+  return map[status]||[status,"wait"];
+}
+function statusTag(s){
+  const [txt,cls]=thaiStatus(s);
+  return `<span class="tag ${cls}">${txt}</span>`;
+}
+function showToast(msg){
+  const t=$("#toast");t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2200);
+}
+function setView(view){
+  state.currentView=view;
+  $$(".view").forEach(v=>v.classList.remove("active"));
+  $("#view-"+view).classList.add("active");
+  $$(".nav-item[data-view]").forEach(n=>n.classList.toggle("active",n.dataset.view===view));
+  const map={
+    home:["วันนี้ · 17 สิงหาคม 2026","งานของฉัน"],
+    campaign:["Birthday Campaign 2026","งานของทีม"],
+    approval:["รอคุณตรวจ 1 งาน","รอฉันอนุมัติ"]
+  };
+  $("#page-eyebrow").textContent=map[view][0];
+  $("#page-title").textContent=map[view][1];
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderHome(){
+  const focus=state.tasks.find(t=>t.id===2);
+  const ready=state.tasks.filter(t=>t.owner==="Jane"&&t.status==="READY");
+  $("#view-home").innerHTML=`
+    <div class="welcome">
+      <h2>สวัสดี Jane 👋</h2>
+      <p>นี่คือสิ่งที่ควรโฟกัสวันนี้ ระบบเรียงจากงานที่กระทบคนอื่นมากที่สุดก่อน</p>
+    </div>
+
+    <div class="focus-card">
+      <div class="focus-head">
+        <div>
+          <div class="focus-kicker">งานที่ควรทำตอนนี้</div>
+          <div class="focus-title">${focus.name}</div>
+          <div class="focus-sub">Birthday Campaign 2026 · กำหนดวันนี้</div>
+        </div>
+        <div class="focus-owner">${avatar("Jane")}<span>งานของคุณ</span></div>
+      </div>
+
+      <div class="focus-grid">
+        <div class="focus-info">
+          <span>ก่อนหน้านี้</span>
+          <strong>Ads Setup เสร็จแล้ว</strong>
+        </div>
+        <div class="focus-info">
+          <span>สถานะตอนนี้</span>
+          <strong>กำลังทำ</strong>
+        </div>
+        <div class="focus-info">
+          <span>ถ้าคุณเสร็จ</span>
+          <strong class="next-person">Golf จะทำ Launch QA ต่อ</strong>
+        </div>
+      </div>
+
+      <div class="focus-actions">
+        <button class="btn primary big" data-task="${focus.id}">เปิดงานนี้</button>
+        <span class="focus-note">ไม่ต้องทัก Golf เอง ระบบจะแจ้งให้เมื่อคุณส่งงานเสร็จ</span>
+      </div>
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-card"><span>เริ่มได้เลย</span><div class="num">${ready.length}</div></div>
+      <div class="summary-card"><span>กำลังทำ</span><div class="num">1</div></div>
+      <div class="summary-card"><span>รอคนอื่น</span><div class="num">2</div></div>
+      <div class="summary-card"><span>รอคุณอนุมัติ</span><div class="num">${state.approvals.filter(a=>a.status==="PENDING").length}</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head">
+          <div><h3>งานของคุณที่เหลือ</h3><p>เรียงจากงานที่เริ่มได้ก่อน</p></div>
+        </div>
+        <div class="panel-body">
+          ${state.tasks.filter(t=>t.owner==="Jane").map(t=>`
+            <div class="simple-task" data-task="${t.id}">
+              <div>
+                <div class="task-title">${t.name}</div>
+                <div class="task-meta">
+                  <span>Birthday Campaign</span>
+                  <span>•</span>
+                  <span>กำหนด ${t.due}</span>
+                  ${t.nextOwner?`<span>• คนถัดไป ${t.nextOwner}</span>`:""}
+                </div>
+              </div>
+              <div class="task-side">${statusTag(t.status)}<span>${t.status==="READY"?"เริ่มได้ทันที":"เปิดดูรายละเอียด"}</span></div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-head">
+            <div><h3>สิ่งที่คุณกำลังรอ</h3><p>ไม่ต้องตามเอง ระบบจะเตือนเมื่อพร้อม</p></div>
+          </div>
+          <div class="panel-body">
+            <div class="wait-card">
+              <div class="wait-head"><strong>Ads Setup</strong>${statusTag("BLOCKED")}</div>
+              <p>รอ Video Editing จาก Nan<br>เมื่อ Nan เสร็จ ระบบจะเปลี่ยนงานนี้เป็น “เริ่มได้” ให้ Golf อัตโนมัติ</p>
+            </div>
+            <div class="wait-card">
+              <div class="wait-head"><strong>Performance Report</strong>${statusTag("BLOCKED")}</div>
+              <p>รอ Launch Ads และ Prepare Tracking ให้ครบก่อน</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:14px">
+          <div class="panel-head">
+            <div><h3>คนที่กำลังรอคุณ</h3><p>ช่วยให้เห็นผลกระทบของงานตัวเอง</p></div>
+          </div>
+          <div class="panel-body">
+            <div class="wait-card">
+              <div class="wait-person">${avatar("Golf")}<strong>Golf · Launch QA</strong></div>
+              <p>Golf จะเริ่มงานต่อได้เมื่อ Campaign Launch Checklist ของคุณเสร็จ</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  bindTaskOpen();
+}
+function renderCampaign(){
+  $("#view-campaign").innerHTML=`
+    <div class="campaign-top">
+      <div class="campaign-title">
+        <div class="campaign-icon">🎂</div>
+        <div>
+          <div class="eyebrow">ACTIVE CAMPAIGN</div>
+          <h2>Birthday Campaign 2026</h2>
+          <p>เป้าหมาย: Launch ให้ทัน 31 Aug · Owner: Jane</p>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>ความคืบหน้า</span><strong>56%</strong></div>
+        <div class="progress"><span></span></div>
+      </div>
+    </div>
+
+    <div class="planning-guide">
+      <div class="guide-step">
+        <div class="guide-num">1</div><div><strong>ทุกคนใส่งานของตัวเอง</strong><span>ช่วยกันบอกว่า Campaign นี้ใครต้องทำอะไร</span></div>
+      </div>
+      <div class="guide-step">
+        <div class="guide-num">2</div><div><strong>เรียงว่าใครต้องรอใคร</strong><span>เชื่อมเฉพาะงานที่จำเป็นต้องต่อกัน</span></div>
+      </div>
+      <div class="guide-step active">
+        <div class="guide-num">3</div><div><strong>เริ่มทำและส่งไม้ต่อ</strong><span>ระบบแจ้งคนถัดไปให้อัตโนมัติ</span></div>
+      </div>
+    </div>
+
+    <div class="team-flow">
+      <div class="team-flow-head">
+        <div><h3>ภาพรวมงานของทีม</h3><p>อ่านจากบนลงล่าง — เห็นทันทีว่าตอนนี้งานอยู่ที่ใคร</p></div>
+        <button class="btn primary" id="campaign-add-task">＋ เพิ่มงานของฉัน</button>
+      </div>
+
+      <div class="flow-list">
+        ${flowItem("✓","done","Creative Brief","Jane","Marketing","เสร็จแล้ว","—")}
+        ${flowItem("✓","done","Write Script","Ploy","Content","เสร็จแล้ว","Creative Brief")}
+        ${flowItem("✓","done","Shooting","Nan","Creative","เสร็จแล้ว","Write Script")}
+        ${flowItem("●","now","Video Editing","Nan","Creative","กำลังทำ","Shooting","Golf รอ Ads Setup")}
+        <div class="parallel-note">อีกทางหนึ่ง Golf กำลังทำ Ads Audience ควบคู่ไปด้วย เพื่อไม่ให้ Launch ช้า</div>
+        ${flowItem("○","","Ads Setup","Golf","Performance","รอ Nan","Video Editing")}
+        ${flowItem("○","","Launch Ads","Golf","Performance","รอ 3 งานให้ครบ","Landing Page + Ads Audience + Ads Setup")}
+        ${flowItem("○","","Performance Report","Beam","Analytics","รอ Launch","Launch Ads + Tracking")}
+        ${flowItem("○","","Management Review","Marketing Head","Management","รอ Report","Performance Report")}
+      </div>
+    </div>`;
+  $("#campaign-add-task").addEventListener("click",()=>$("#task-modal").classList.add("open"));
+}
+function flowItem(symbol,dotClass,name,owner,team,stateText,depends,hint=""){
+  return `<div class="flow-item">
+    <div class="flow-dot ${dotClass}">${symbol}</div>
+    <div class="flow-card" data-flow-task="${name}">
+      <div class="flow-main">
+        <strong>${name}</strong>
+        <div class="meta"><span>${team}</span><span>•</span><span>${depends==="—"?"เริ่มได้เอง":"ต้องรอ "+depends}</span></div>
+      </div>
+      <div class="flow-right">
+        <div class="who">${avatar(owner)}<span>${owner}</span></div>
+        <div class="hint">${hint || stateText}</div>
+      </div>
+    </div>
+  </div>`;
+}
+function renderApproval(){
+  const a=state.approvals.find(x=>x.status==="PENDING");
+  if(!a){
+    $("#view-approval").innerHTML=`<div class="panel" style="padding:44px;text-align:center"><h2>ไม่มีงานรอคุณอนุมัติ 🎉</h2><p style="font-size:11px;color:var(--muted)">เมื่อมีคนส่งงานมา ระบบจะแจ้งให้ที่นี่</p></div>`;
+    return;
+  }
+  $("#view-approval").innerHTML=`
+    <div class="approval-card">
+      <div class="eyebrow">${a.campaign}</div>
+      <h2>${a.task}</h2>
+      <div class="approval-meta">
+        <span>ส่งโดย ${a.owner}</span><span>กำหนด ${a.due}</span><span>ไฟล์ ${a.file}</span>
+      </div>
+
+      <div class="preview-box">
+        <strong>สิ่งที่ต้องเช็ก</strong>
+        <p>ดูว่างานพร้อมส่งต่อให้ทีม Ads หรือยัง ถ้าโอเคกด “ผ่าน ส่งต่อได้” ระบบจะปลดล็อก Ads Setup และแจ้ง Golf ให้อัตโนมัติ</p>
+      </div>
+
+      <div class="approval-question">งานนี้พร้อมส่งต่อให้คนถัดไปหรือยัง?</div>
+      <div class="approval-actions">
+        <button class="btn success big" id="approve-btn">✓ ผ่าน ส่งต่อได้</button>
+        <button class="btn danger big" id="revision-btn">↩ ส่งกลับแก้</button>
+      </div>
+    </div>`;
+  $("#approve-btn").addEventListener("click",approveVideo);
+  $("#revision-btn").addEventListener("click",requestRevision);
+}
+function approveVideo(){
+  const a=state.approvals.find(x=>x.status==="PENDING"); if(!a)return;
+  a.status="APPROVED";
+  const video=state.tasks.find(t=>t.id===4), ads=state.tasks.find(t=>t.id===6);
+  video.status="COMPLETED"; ads.status="READY";
+  state.notifications.unshift({icon:"→",title:"ส่งไม้ให้ Golf แล้ว",body:"Video Editing ผ่านแล้ว Ads Setup พร้อมเริ่ม",time:"เมื่อสักครู่"});
+  updateBadges();
+  renderApproval();
+  showToast("ผ่านแล้ว — ระบบแจ้ง Golf ให้เริ่ม Ads Setup ต่อเรียบร้อย");
+}
+function requestRevision(){
+  const a=state.approvals.find(x=>x.status==="PENDING"); if(!a)return;
+  a.status="REVISION";
+  const video=state.tasks.find(t=>t.id===4); video.status="REVISION";
+  state.notifications.unshift({icon:"↩",title:"ส่งกลับให้ Nan แก้แล้ว",body:"Video Editing ถูกส่งกลับไปแก้ไข",time:"เมื่อสักครู่"});
+  updateBadges(); renderApproval();
+  showToast("ส่งกลับแก้แล้ว — Nan จะได้รับแจ้งเตือน");
+}
+function renderNotifications(){
+  $("#notification-list").innerHTML=state.notifications.map(n=>`
+    <div class="notification">
+      <div class="notif-icon">${n.icon}</div>
+      <div><strong>${n.title}</strong><p>${n.body}</p><time>${n.time}</time></div>
+    </div>`).join("");
+}
+function updateBadges(){
+  $("#approval-badge").textContent=state.approvals.filter(a=>a.status==="PENDING").length;
+  $("#notif-badge").textContent=state.notifications.length;
+  renderNotifications();
+}
+function bindTaskOpen(){
+  $$("[data-task]").forEach(el=>el.addEventListener("click",()=>openTask(Number(el.dataset.task))));
+}
+function openTask(id){
+  const t=state.tasks.find(x=>x.id===id); if(!t)return;
+  $("#task-drawer-title").textContent=t.name;
+  const before=t.depends && t.depends!=="—" ? t.depends : "ไม่มี — เริ่มได้เลย";
+  $("#task-drawer-body").innerHTML=`
+    <div class="drawer-section">
+      <div class="info-grid">
+        <div class="info-box"><span>สถานะ</span><strong>${thaiStatus(t.status)[0]}</strong></div>
+        <div class="info-box"><span>กำหนด</span><strong>${t.due}</strong></div>
+        <div class="info-box"><span>คนรับผิดชอบ</span><strong>${t.owner}</strong></div>
+        <div class="info-box"><span>คนตรวจ</span><strong>${t.approver}</strong></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="eyebrow">งานนี้อยู่ตรงไหนใน Flow</div>
+      <div style="margin-top:12px">
+        <div class="story-card">
+          <div class="story-label">ก่อนจะเริ่มงานนี้</div>
+          <div class="story-main">${avatar(t.owner)}<div><strong>${before}</strong><span>${t.status==="BLOCKED"?"ยังรออยู่":"ส่วนนี้พร้อมแล้ว"}</span></div></div>
+        </div>
+
+        <div class="story-card current">
+          <div class="story-label">งานนี้</div>
+          <div class="story-main">${avatar(t.owner)}<div><strong>${t.name}</strong><span>${t.owner} · ${thaiStatus(t.status)[0]}</span></div></div>
+        </div>
+
+        <div class="story-card">
+          <div class="story-label">หลังจากคุณเสร็จ</div>
+          <div class="story-main">${avatar(t.nextOwner)}<div><strong>${t.next}</strong><span>${t.nextOwner} จะรับไม้ต่อ</span></div></div>
+          <div class="story-message">คุณไม่ต้องส่งข้อความหา ${t.nextOwner} เอง ระบบจะแจ้งให้เมื่อถึงคิว</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="eyebrow">สิ่งที่ต้องส่ง</div>
+      <p style="font-size:11px;line-height:1.65;color:#667487">แนบไฟล์หรือใส่ข้อมูลที่จำเป็นให้คนถัดไปทำงานต่อได้ โดยไม่ต้องถามข้อมูลซ้ำ</p>
+      <button class="btn light block">＋ แนบไฟล์ / ลิงก์งาน</button>
+    </div>
+
+    <div class="drawer-actions">
+      ${actionFor(t)}
+    </div>`;
+  $("#task-drawer").classList.add("open");
+  bindTaskAction(t);
+}
+function actionFor(t){
+  if(t.status==="READY") return `<button class="btn primary big" id="task-action">เริ่มทำงานนี้</button>`;
+  if(t.status==="IN_PROGRESS" && t.approver!=="—") return `<button class="btn primary big" id="task-action">ส่งให้ตรวจ</button>`;
+  if(t.status==="IN_PROGRESS") return `<button class="btn primary big" id="task-action">ทำเสร็จ ส่งต่อ</button>`;
+  if(t.status==="BLOCKED") return `<button class="btn light big" disabled>ยังเริ่มไม่ได้ — รอ ${t.depends}</button>`;
+  if(t.status==="REVISION") return `<button class="btn primary big" id="task-action">แก้ไขต่อ</button>`;
+  return `<button class="btn light big" disabled>เสร็จแล้ว</button>`;
+}
+function bindTaskAction(t){
+  const btn=$("#task-action"); if(!btn)return;
+  btn.addEventListener("click",()=>{
+    if(t.status==="READY"){
+      t.status="IN_PROGRESS"; showToast("เริ่มงานแล้ว"); openTask(t.id); renderHome();
+    }else if(t.status==="IN_PROGRESS" && t.approver!=="—"){
+      t.status="REVIEW";
+      if(!state.approvals.some(a=>a.taskId===t.id&&a.status==="PENDING")){
+        state.approvals.unshift({id:"a"+Date.now(),taskId:t.id,task:t.name,owner:t.owner,campaign:"Birthday Campaign 2026",due:t.due,file:"latest-file",status:"PENDING"});
+      }
+      updateBadges(); showToast("ส่งให้ตรวจแล้ว ระบบจะแจ้ง Approver ให้อัตโนมัติ"); openTask(t.id);
+    }else if(t.status==="IN_PROGRESS"){
+      t.status="COMPLETED"; showToast(`เสร็จแล้ว — ระบบกำลังแจ้ง ${t.nextOwner}`); openTask(t.id); renderHome();
+    }else if(t.status==="REVISION"){
+      t.status="IN_PROGRESS"; showToast("กลับมาทำงานต่อแล้ว"); openTask(t.id);
+    }
+  });
+}
+
+$("#nav").addEventListener("click",e=>{
+  const item=e.target.closest("[data-view]"); if(!item)return;
+  const v=item.dataset.view;
+  if(v==="home")renderHome();
+  if(v==="campaign")renderCampaign();
+  if(v==="approval")renderApproval();
+  setView(v);
+});
+$("#notification-button").addEventListener("click",()=>$("#notification-drawer").classList.add("open"));
+$$(".close-drawer").forEach(b=>b.addEventListener("click",()=>b.closest(".drawer").classList.remove("open")));
+$("#add-task-btn").addEventListener("click",()=>$("#task-modal").classList.add("open"));
+$$(".close-modal").forEach(b=>b.addEventListener("click",()=>$("#task-modal").classList.remove("open")));
+$("#task-modal").addEventListener("click",e=>{if(e.target.id==="task-modal")e.currentTarget.classList.remove("open")});
+$("#help-btn").addEventListener("click",()=>$("#help-modal").classList.add("open"));
+$(".close-help").addEventListener("click",()=>$("#help-modal").classList.remove("open"));
+$("#help-modal").addEventListener("click",e=>{if(e.target.id==="help-modal")e.currentTarget.classList.remove("open")});
+$("#task-form").addEventListener("submit",e=>{
+  e.preventDefault();
+  const fd=new FormData(e.currentTarget);
+  const dep=fd.get("depends");
+  const newTask={
+    id:Date.now(),name:fd.get("name"),owner:"Jane",team:"Marketing",
+    due:fd.get("due")||"ไม่ระบุ",status:dep?"BLOCKED":"READY",
+    approver:fd.get("approver")||"—",depends:dep||"—",next:"งานถัดไป",nextOwner:"ทีม"
+  };
+  state.tasks.unshift(newTask);
+  $("#task-modal").classList.remove("open");
+  e.currentTarget.reset();
+  renderHome();
+  setView("home");
+  showToast(dep?"เพิ่มงานแล้ว — งานนี้จะเริ่มเมื่อสิ่งที่รอเสร็จ":"เพิ่มงานแล้ว — งานนี้พร้อมเริ่ม");
+});
+
+renderHome();
+renderNotifications();
+updateBadges();
+
+</script>
+</body>
+</html>

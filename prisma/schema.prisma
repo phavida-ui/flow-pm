@@ -1,0 +1,378 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------- Enums ----------
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum CampaignStatus {
+  DRAFT
+  PLANNING
+  READY_TO_START
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum CampaignMemberRole {
+  OWNER
+  MANAGER
+  MEMBER
+  APPROVER
+}
+
+enum TaskStatus {
+  PLANNED
+  BLOCKED
+  READY
+  IN_PROGRESS
+  REVIEW
+  REVISION
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REVISION_REQUESTED
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_READY
+  APPROVAL_REQUIRED
+  REVISION_REQUESTED
+  TASK_OVERDUE
+  HANDOFF_RECEIVED
+}
+
+enum ActivityEventType {
+  CAMPAIGN_CREATED
+  CAMPAIGN_STARTED
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_ASSIGNED
+  TASK_STARTED
+  TASK_SUBMITTED
+  TASK_APPROVED
+  TASK_REVISION_REQUESTED
+  TASK_COMPLETED
+  TASK_READY
+  TASK_HANDOFF
+  TASK_OVERDUE
+  CAMPAIGN_COMPLETED
+}
+
+// ---------- Identity ----------
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  avatarUrl    String?
+  role         UserRole @default(MEMBER)
+  isApprover   Boolean  @default(false)
+  teamId       String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  team Team? @relation(fields: [teamId], references: [id])
+
+  ownedCampaigns   Campaign[]         @relation("CampaignOwner")
+  createdCampaigns Campaign[]         @relation("CampaignCreatedBy")
+  campaignMembers  CampaignMember[]
+  ownedTasks       Task[]             @relation("TaskOwner")
+  approverTasks    Task[]             @relation("TaskApprover")
+  createdTasks     Task[]             @relation("TaskCreatedBy")
+  approvals        Approval[]
+  handoffsFrom     TaskHandoff[]      @relation("HandoffFromUser")
+  handoffsTo       TaskHandoff[]      @relation("HandoffToUser")
+  notifications    Notification[]
+  activityLogs     ActivityLog[]
+  comments         Comment[]
+  attachments      Attachment[]
+  createdTemplates WorkflowTemplate[]
+
+  @@index([teamId])
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  members User[]
+  tasks   Task[]
+}
+
+// ---------- Campaign ----------
+
+model Campaign {
+  id                  String         @id @default(cuid())
+  name                String
+  description         String?
+  ownerId             String
+  workflowTemplateId  String?
+  status              CampaignStatus @default(DRAFT)
+  startDate           DateTime?
+  targetDate          DateTime?
+  createdBy           String
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  owner    User              @relation("CampaignOwner", fields: [ownerId], references: [id])
+  creator  User              @relation("CampaignCreatedBy", fields: [createdBy], references: [id])
+  template WorkflowTemplate? @relation(fields: [workflowTemplateId], references: [id])
+
+  members       CampaignMember[]
+  tasks         Task[]
+  handoffs      TaskHandoff[]
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+
+  @@index([ownerId])
+  @@index([status])
+}
+
+model CampaignMember {
+  id         String             @id @default(cuid())
+  campaignId String
+  userId     String
+  role       CampaignMemberRole @default(MEMBER)
+  createdAt  DateTime           @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([campaignId, userId])
+  @@index([userId])
+}
+
+// ---------- Workflow templates ----------
+
+model WorkflowTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator   User                      @relation(fields: [createdBy], references: [id])
+  tasks     WorkflowTemplateTask[]
+  campaigns Campaign[]
+}
+
+model WorkflowTemplateTask {
+  id                  String  @id @default(cuid())
+  templateId          String
+  name                String
+  description         String?
+  defaultTeamId       String?
+  defaultOwnerId      String?
+  defaultApproverId   String?
+  defaultDurationDays Int?
+  sequence            Int     @default(0)
+
+  template WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  dependsOn  WorkflowTemplateDependency[] @relation("TemplateTaskDependent")
+  dependents WorkflowTemplateDependency[] @relation("TemplateTaskDependsOn")
+  tasks      Task[]
+
+  @@index([templateId])
+}
+
+model WorkflowTemplateDependency {
+  id              String @id @default(cuid())
+  taskId          String
+  dependsOnTaskId String
+
+  task          WorkflowTemplateTask @relation("TemplateTaskDependent", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOnTask WorkflowTemplateTask @relation("TemplateTaskDependsOn", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnTaskId])
+}
+
+// ---------- Task ----------
+
+model Task {
+  id             String        @id @default(cuid())
+  campaignId     String
+  templateTaskId String?
+  name           String
+  description    String?
+  teamId         String?
+  ownerId        String?
+  approverId     String?
+  status         TaskStatus    @default(PLANNED)
+  priority       TaskPriority?
+  dueDate        DateTime?
+  startedAt      DateTime?
+  submittedAt    DateTime?
+  completedAt    DateTime?
+  createdBy      String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  campaign     Campaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  templateTask WorkflowTemplateTask? @relation(fields: [templateTaskId], references: [id])
+  team         Team?                 @relation(fields: [teamId], references: [id])
+  owner        User?                 @relation("TaskOwner", fields: [ownerId], references: [id])
+  approver     User?                 @relation("TaskApprover", fields: [approverId], references: [id])
+  creator      User                  @relation("TaskCreatedBy", fields: [createdBy], references: [id])
+
+  dependsOn  TaskDependency[] @relation("TaskDependent")
+  dependents TaskDependency[] @relation("TaskDependsOn")
+
+  approvals     Approval[]
+  handoffsFrom  TaskHandoff[]  @relation("HandoffFromTask")
+  handoffsTo    TaskHandoff[]  @relation("HandoffToTask")
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+  comments      Comment[]
+  attachments   Attachment[]
+
+  @@index([campaignId])
+  @@index([ownerId])
+  @@index([status])
+}
+
+model TaskDependency {
+  id              String @id @default(cuid())
+  taskId          String
+  dependsOnTaskId String
+
+  task          Task @relation("TaskDependent", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOnTask Task @relation("TaskDependsOn", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnTaskId])
+  @@index([dependsOnTaskId])
+}
+
+// ---------- Approval ----------
+
+model Approval {
+  id           String         @id @default(cuid())
+  taskId       String
+  approverId   String
+  status       ApprovalStatus @default(PENDING)
+  comment      String?
+  submittedAt  DateTime?
+  reviewedAt   DateTime?
+  createdAt    DateTime       @default(now())
+
+  task     Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  approver User @relation(fields: [approverId], references: [id])
+
+  @@index([taskId])
+  @@index([approverId])
+}
+
+// ---------- Handoff ----------
+
+model TaskHandoff {
+  id         String   @id @default(cuid())
+  campaignId String
+  fromTaskId String
+  toTaskId   String
+  fromUserId String?
+  toUserId   String
+  createdAt  DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  fromTask Task     @relation("HandoffFromTask", fields: [fromTaskId], references: [id])
+  toTask   Task     @relation("HandoffToTask", fields: [toTaskId], references: [id])
+  fromUser User?    @relation("HandoffFromUser", fields: [fromUserId], references: [id])
+  toUser   User     @relation("HandoffToUser", fields: [toUserId], references: [id])
+
+  @@unique([fromTaskId, toTaskId])
+  @@index([campaignId])
+}
+
+// ---------- Notifications & Activity ----------
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  type       NotificationType
+  campaignId String?
+  taskId     String?
+  title      String
+  message    String
+  isRead     Boolean          @default(false)
+  createdAt  DateTime         @default(now())
+
+  user     User      @relation(fields: [userId], references: [id])
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  task     Task?     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+model ActivityLog {
+  id           String             @id @default(cuid())
+  campaignId   String
+  taskId       String?
+  actorId      String?
+  eventType    ActivityEventType
+  metadataJson Json?
+  createdAt    DateTime           @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  task     Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  actor    User?    @relation(fields: [actorId], references: [id])
+
+  @@index([campaignId, createdAt])
+}
+
+// ---------- Collaboration ----------
+
+model Comment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([taskId])
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  taskId     String
+  uploadedBy String
+  fileName   String
+  fileUrl    String
+  createdAt  DateTime @default(now())
+
+  task     Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploader User @relation(fields: [uploadedBy], references: [id])
+
+  @@index([taskId])
+}
