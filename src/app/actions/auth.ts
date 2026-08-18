@@ -1,0 +1,34 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { prisma } from "@/server/db";
+import { createSessionCookie, clearSessionCookie, verifyPassword } from "@/server/auth";
+
+export type LoginState = { error?: string } | undefined;
+
+export async function loginAction(_prev: LoginState, formData: FormData): Promise<LoginState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
+
+  if (!email || !password) {
+    return { error: "Enter your email and password." };
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.active) {
+    return { error: "No account found with that email." };
+  }
+
+  const valid = await verifyPassword(password, user.passwordHash);
+  if (!valid) {
+    return { error: "Incorrect password." };
+  }
+
+  await createSessionCookie(user.id);
+  redirect("/my-work");
+}
+
+export async function logoutAction() {
+  await clearSessionCookie();
+  redirect("/login");
+}

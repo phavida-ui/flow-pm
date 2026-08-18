@@ -99,20 +99,22 @@ model User {
 
   team Team? @relation(fields: [teamId], references: [id])
 
-  ownedCampaigns   Campaign[]         @relation("CampaignOwner")
-  createdCampaigns Campaign[]         @relation("CampaignCreatedBy")
-  campaignMembers  CampaignMember[]
-  ownedTasks       Task[]             @relation("TaskOwner")
-  approverTasks    Task[]             @relation("TaskApprover")
-  createdTasks     Task[]             @relation("TaskCreatedBy")
-  approvals        Approval[]
-  handoffsFrom     TaskHandoff[]      @relation("HandoffFromUser")
-  handoffsTo       TaskHandoff[]      @relation("HandoffToUser")
-  notifications    Notification[]
-  activityLogs     ActivityLog[]
-  comments         Comment[]
-  attachments      Attachment[]
-  createdTemplates WorkflowTemplate[]
+  ownedCampaigns                 Campaign[]             @relation("CampaignOwner")
+  createdCampaigns               Campaign[]             @relation("CampaignCreatedBy")
+  campaignMembers                CampaignMember[]
+  ownedTasks                     Task[]                 @relation("TaskOwner")
+  approverTasks                  Task[]                 @relation("TaskApprover")
+  createdTasks                   Task[]                 @relation("TaskCreatedBy")
+  approvals                      Approval[]
+  handoffsFrom                   TaskHandoff[]          @relation("HandoffFromUser")
+  handoffsTo                     TaskHandoff[]          @relation("HandoffToUser")
+  notifications                  Notification[]
+  activityLogs                   ActivityLog[]
+  comments                       Comment[]
+  attachments                    Attachment[]
+  createdTemplates               WorkflowTemplate[]
+  defaultOwnerOfTemplateTasks    WorkflowTemplateTask[] @relation("TemplateTaskDefaultOwner")
+  defaultApproverOfTemplateTasks WorkflowTemplateTask[] @relation("TemplateTaskDefaultApprover")
 
   @@index([teamId])
 }
@@ -122,24 +124,25 @@ model Team {
   name      String   @unique
   createdAt DateTime @default(now())
 
-  members User[]
-  tasks   Task[]
+  members       User[]
+  tasks         Task[]
+  templateTasks WorkflowTemplateTask[]
 }
 
 // ---------- Campaign ----------
 
 model Campaign {
-  id                  String         @id @default(cuid())
-  name                String
-  description         String?
-  ownerId             String
-  workflowTemplateId  String?
-  status              CampaignStatus @default(DRAFT)
-  startDate           DateTime?
-  targetDate          DateTime?
-  createdBy           String
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
+  id                 String         @id @default(cuid())
+  name               String
+  description        String?
+  ownerId            String
+  workflowTemplateId String?
+  status             CampaignStatus @default(DRAFT)
+  startDate          DateTime?
+  targetDate         DateTime?
+  createdBy          String
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 
   owner    User              @relation("CampaignOwner", fields: [ownerId], references: [id])
   creator  User              @relation("CampaignCreatedBy", fields: [createdBy], references: [id])
@@ -179,7 +182,7 @@ model WorkflowTemplate {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  creator   User                      @relation(fields: [createdBy], references: [id])
+  creator   User                   @relation(fields: [createdBy], references: [id])
   tasks     WorkflowTemplateTask[]
   campaigns Campaign[]
 }
@@ -195,7 +198,10 @@ model WorkflowTemplateTask {
   defaultDurationDays Int?
   sequence            Int     @default(0)
 
-  template WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  template        WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  defaultTeam     Team?            @relation(fields: [defaultTeamId], references: [id])
+  defaultOwner    User?            @relation("TemplateTaskDefaultOwner", fields: [defaultOwnerId], references: [id])
+  defaultApprover User?            @relation("TemplateTaskDefaultApprover", fields: [defaultApproverId], references: [id])
 
   dependsOn  WorkflowTemplateDependency[] @relation("TemplateTaskDependent")
   dependents WorkflowTemplateDependency[] @relation("TemplateTaskDependsOn")
@@ -274,14 +280,14 @@ model TaskDependency {
 // ---------- Approval ----------
 
 model Approval {
-  id           String         @id @default(cuid())
-  taskId       String
-  approverId   String
-  status       ApprovalStatus @default(PENDING)
-  comment      String?
-  submittedAt  DateTime?
-  reviewedAt   DateTime?
-  createdAt    DateTime       @default(now())
+  id          String         @id @default(cuid())
+  taskId      String
+  approverId  String
+  status      ApprovalStatus @default(PENDING)
+  comment     String?
+  submittedAt DateTime?
+  reviewedAt  DateTime?
+  createdAt   DateTime       @default(now())
 
   task     Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   approver User @relation(fields: [approverId], references: [id])
@@ -332,13 +338,13 @@ model Notification {
 }
 
 model ActivityLog {
-  id           String             @id @default(cuid())
+  id           String            @id @default(cuid())
   campaignId   String
   taskId       String?
   actorId      String?
   eventType    ActivityEventType
   metadataJson Json?
-  createdAt    DateTime           @default(now())
+  createdAt    DateTime          @default(now())
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   task     Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)

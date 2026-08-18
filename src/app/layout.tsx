@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: "Handoff-first project management for cross-functional campaigns.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"

@@ -1,0 +1,143 @@
+import "server-only";
+import type { Prisma, PrismaClient } from "@prisma/client";
+import { prisma } from "@/server/db";
+import { assertTransition } from "@/server/services/task.service";
+import { logActivity } from "@/server/services/activity.service";
+import { notify } from "@/server/services/notification.service";
+
+type Tx = PrismaClient | Prisma.TransactionClient;
+
+/**
+ * The automatic handoff engine (spec §19). Must run inside a transaction.
+ * Idempotent: if the task is already COMPLETED, this is a no-op.
+ */
+export async function completeTaskCore(tx: Tx, taskId: string, actorId?: string | null) {
+  const task = await tx.task.findUniqueOrThrow({ where: { id: taskId } });
+  if (task.status === "COMPLETED") return task;
+
+  assertTransition(task.status, "COMPLETED");
+
+  const updateResult = await tx.task.updateMany({
+    where: { id: taskId, status: { not: "COMPLETED" } },
+    data: { status: "COMPLETED", completedAt: new Date() },
+  });
+  if (updateResult.count === 0) {
+    // Lost a race with a concurrent completion — treat as already done.
+    return tx.task.findUniqueOrThrow({ where: { id: taskId } });
+  }
+
+  await logActivity(tx, {
+    campaignId: task.campaignId,
+    taskId,
+    actorId,
+    eventType: "TASK_COMPLETED",
+    metadata: { name: task.name },
+  });
+
+  const downstreamDeps = await tx.taskDependency.findMany({
+    where: { dependsOnTaskId: taskId },
+    select: { taskId: true },
+  });
+
+  for (const { taskId: downstreamId } of downstreamDeps) {
+    const downstream = await tx.task.findUniqueOrThrow({ where: { id: downstreamId } });
+    if (downstream.status !== "BLOCKED") continue;
+
+    const deps = await tx.taskDependency.findMany({
+      where: { taskId: downstreamId },
+      select: { dependsOnTask: { select: { status: true } } },
+    });
+    const allCompleted = deps.every((d) => d.dependsOnTask.status === "COMPLETED");
+    if (!allCompleted) continue;
+
+    const unblockResult = await tx.task.updateMany({
+      where: { id: downstreamId, status: "BLOCKED" },
+      data: { status: "READY" },
+    });
+    if (unblockResult.count === 0) continue; // already unblocked concurrently
+
+    const existingHandoff = await tx.taskHandoff.findUnique({
+      where: { fromTaskId_toTaskId: { fromTaskId: taskId, toTaskId: downstreamId } },
+    });
+    if (!existingHandoff) {
+      await tx.taskHandoff.create({
+        data: {
+          campaignId: task.campaignId,
+          fromTaskId: taskId,
+          toTaskId: downstreamId,
+          fromUserId: task.ownerId,
+          toUserId: downstream.ownerId ?? task.ownerId ?? actorId ?? "",
+        },
+      });
+    }
+
+    await logActivity(tx, {
+      campaignId: task.campaignId,
+      taskId: downstreamId,
+      actorId,
+      eventType: "TASK_READY",
+      metadata: { unblockedBy: task.name },
+    });
+    await logActivity(tx, {
+      campaignId: task.campaignId,
+      taskId: downstreamId,
+      actorId,
+      eventType: "TASK_HANDOFF",
+      metadata: { fromTaskId: taskId, toTaskId: downstreamId },
+    });
+
+    if (downstream.ownerId) {
+      await notify(tx, {
+        userId: downstream.ownerId,
+        type: "TASK_READY",
+        campaignId: task.campaignId,
+        taskId: downstreamId,
+        title: "Ready to start",
+        message: `${task.name} was completed. You can start "${downstream.name}" now.`,
+      });
+    }
+  }
+
+  await checkCampaignCompletionCore(tx, task.campaignId, actorId);
+
+  return tx.task.findUniqueOrThrow({ where: { id: taskId } });
+}
+
+export async function checkCampaignCompletionCore(tx: Tx, campaignId: string, actorId?: string | null) {
+  const campaign = await tx.campaign.findUniqueOrThrow({ where: { id: campaignId } });
+  if (campaign.status === "COMPLETED") return;
+
+  const tasks = await tx.task.findMany({
+    where: { campaignId, status: { not: "CANCELLED" } },
+    select: { status: true },
+  });
+  if (tasks.length === 0) return;
+
+  const allCompleted = tasks.every((t) => t.status === "COMPLETED");
+  if (!allCompleted) return;
+
+  const result = await tx.campaign.updateMany({
+    where: { id: campaignId, status: { not: "COMPLETED" } },
+    data: { status: "COMPLETED" },
+  });
+  if (result.count === 0) return;
+
+  await logActivity(tx, {
+    campaignId,
+    actorId,
+    eventType: "CAMPAIGN_COMPLETED",
+  });
+
+  await notify(tx, {
+    userId: campaign.ownerId,
+    type: "TASK_READY",
+    campaignId,
+    title: "Campaign completed",
+    message: `"${campaign.name}" is complete — all tasks are done.`,
+  });
+}
+
+/** Standalone entry point (e.g. "Complete Task" button when there's no approver). */
+export async function completeTask(taskId: string, actorId: string) {
+  return prisma.$transaction((tx) => completeTaskCore(tx, taskId, actorId));
+}

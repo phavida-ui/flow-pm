@@ -1,0 +1,164 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { requireUser, isManagerOrAdmin } from "@/server/auth";
+import { prisma } from "@/server/db";
+import { PageHeader } from "@/components/page-header";
+import { StatusBadge } from "@/components/status-badge";
+import { TaskActions } from "@/components/task-actions";
+import { ReassignControls } from "@/components/reassign-controls";
+import { CommentForm } from "@/components/comment-form";
+import { formatDue, formatDateTime } from "@/lib/format";
+import { Avatar } from "@/components/avatar";
+
+export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const user = await requireUser();
+
+  const task = await prisma.task.findUnique({
+    where: { id },
+    include: {
+      campaign: { select: { id: true, name: true, status: true } },
+      team: { select: { name: true } },
+      owner: { select: { id: true, name: true } },
+      approver: { select: { id: true, name: true } },
+      dependsOn: { include: { dependsOnTask: { select: { id: true, name: true, status: true, owner: { select: { name: true } } } } } },
+      dependents: { include: { task: { select: { id: true, name: true, status: true, owner: { select: { name: true } } } } } },
+      comments: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "asc" } },
+      approvals: { orderBy: { createdAt: "desc" }, take: 3 },
+    },
+  });
+
+  if (!task) notFound();
+
+  const users = await prisma.user.findMany({ where: { active: true }, select: { id: true, name: true }, orderBy: { name: "asc" } });
+
+  const isOwner = task.ownerId === user.id;
+  const isApprover = task.approverId === user.id;
+  const canManage = isManagerOrAdmin(user);
+
+  return (
+    <div>
+      <PageHeader eyebrow={task.campaign.name} title={task.name} />
+
+      <div className="grid grid-cols-[1.4fr_.6fr] gap-5 max-[900px]:grid-cols-1">
+        <div className="grid gap-4">
+          <div className="rounded-[17px] border border-line bg-white p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <StatusBadge status={task.status} />
+              <Link href={`/campaigns/${task.campaign.id}`} className="text-[11px] font-bold text-primary-strong hover:underline">
+                {task.campaign.name}
+              </Link>
+            </div>
+
+            {task.description && <p className="mb-4 text-[12px] leading-relaxed text-[#3c4a5c]">{task.description}</p>}
+
+            <div className="grid grid-cols-4 gap-3 text-[11px]">
+              <div>
+                <span className="block text-[9px] font-bold text-muted">Owner</span>
+                <strong className="mt-1 block">{task.owner?.name ?? "Unassigned"}</strong>
+              </div>
+              <div>
+                <span className="block text-[9px] font-bold text-muted">Team</span>
+                <strong className="mt-1 block">{task.team?.name ?? "—"}</strong>
+              </div>
+              <div>
+                <span className="block text-[9px] font-bold text-muted">Approver</span>
+                <strong className="mt-1 block">{task.approver?.name ?? "None required"}</strong>
+              </div>
+              <div>
+                <span className="block text-[9px] font-bold text-muted">Due</span>
+                <strong className="mt-1 block">{task.dueDate ? formatDue(task.dueDate) : "—"}</strong>
+              </div>
+            </div>
+
+            {canManage && (
+              <div className="mt-4 border-t border-line pt-4">
+                <ReassignControls taskId={task.id} campaignId={task.campaign.id} ownerId={task.ownerId} approverId={task.approverId} users={users} />
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-[17px] border border-line bg-white p-5">
+            <TaskActions
+              taskId={task.id}
+              campaignId={task.campaign.id}
+              status={task.status}
+              isOwner={isOwner}
+              isApprover={isApprover}
+              hasApprover={Boolean(task.approverId)}
+            />
+          </div>
+
+          {task.approvals.length > 0 && task.approvals[0].comment && (
+            <div className="rounded-[13px] bg-orange-soft px-4 py-3 text-[11px] font-semibold text-[#9a661c]">
+              {task.approvals[0].comment}
+            </div>
+          )}
+
+          <div className="rounded-[17px] border border-line bg-white p-5">
+            <h3 className="mb-3 text-sm font-extrabold">Comments</h3>
+            <div className="mb-3 grid gap-3">
+              {task.comments.length === 0 && <p className="text-[11px] text-muted">No comments yet.</p>}
+              {task.comments.map((c) => (
+                <div key={c.id} className="flex gap-2.5">
+                  <Avatar name={c.user.name} size={26} />
+                  <div>
+                    <div className="text-[11px]">
+                      <strong>{c.user.name}</strong> <span className="text-muted">{formatDateTime(c.createdAt)}</span>
+                    </div>
+                    <p className="mt-0.5 text-[12px]">{c.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <CommentForm taskId={task.id} campaignId={task.campaign.id} />
+          </div>
+        </div>
+
+        <div className="grid gap-4">
+          <div className="rounded-[17px] border border-line bg-white p-4">
+            <h4 className="mb-3 text-[10px] font-extrabold uppercase tracking-wide text-muted">Upstream</h4>
+            {task.dependsOn.length === 0 ? (
+              <p className="text-[11px] text-muted">Nothing — this can start anytime.</p>
+            ) : (
+              <div className="grid gap-2">
+                {task.dependsOn.map((d) => (
+                  <Link key={d.id} href={`/tasks/${d.dependsOnTask.id}`} className="block rounded-[11px] border border-line p-2.5 hover:bg-[#f9fbfd]">
+                    <strong className="text-[11px]">{d.dependsOnTask.name}</strong>
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-[9px] text-muted">{d.dependsOnTask.owner?.name}</span>
+                      <StatusBadge status={d.dependsOnTask.status} />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-[17px] border border-line bg-white p-4">
+            <h4 className="mb-3 text-[10px] font-extrabold uppercase tracking-wide text-muted">Downstream</h4>
+            {task.dependents.length === 0 ? (
+              <p className="text-[11px] text-muted">Nobody is waiting on this task.</p>
+            ) : (
+              <div className="grid gap-2">
+                {task.dependents.map((d) => (
+                  <Link key={d.id} href={`/tasks/${d.task.id}`} className="block rounded-[11px] border border-line p-2.5 hover:bg-[#f9fbfd]">
+                    <strong className="text-[11px]">{d.task.name}</strong>
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-[9px] text-muted">{d.task.owner?.name}</span>
+                      {d.task.status === "BLOCKED" && task.status !== "COMPLETED" ? (
+                        <span className="text-[9px] font-extrabold text-[#a86c1a]">Waiting for you</span>
+                      ) : (
+                        <StatusBadge status={d.task.status} />
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
