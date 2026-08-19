@@ -10,9 +10,11 @@ import { TaskActions } from "@/components/task-actions";
 import { ReassignControls } from "@/components/reassign-controls";
 import { CommentForm } from "@/components/comment-form";
 import { SubtaskList } from "@/components/subtask-list";
+import { AttachmentList } from "@/components/attachment-list";
 import { formatDue, formatDateTime } from "@/lib/format";
 import { Avatar } from "@/components/avatar";
 import { listSubtasks } from "@/server/services/subtask.service";
+import { listAttachments } from "@/server/services/attachment.service";
 
 export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -34,9 +36,10 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   if (!task) notFound();
 
-  const [users, subtasks] = await Promise.all([
+  const [users, subtasks, attachments] = await Promise.all([
     prisma.user.findMany({ where: { active: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     listSubtasks(task.id),
+    listAttachments(task.id),
   ]);
 
   const isOwner = task.ownerId === user.id;
@@ -92,6 +95,8 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
               </div>
             )}
           </div>
+
+          <AttachmentList taskId={task.id} attachments={attachments} currentUserId={user.id} />
 
           <div className="rounded-[17px] border border-line bg-white p-5">
             <TaskActions
