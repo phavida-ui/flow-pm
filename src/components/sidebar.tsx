@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
-import { Home, LayoutGrid, CheckCircle2, GitBranch, Bell, Settings, LogOut } from "lucide-react";
+import { Home, LayoutGrid, CheckCircle2, GitBranch, Bell, Settings, LogOut, Users } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { logoutAction } from "@/app/actions/auth";
 
@@ -38,7 +38,7 @@ export function Sidebar({
       </div>
 
       <nav className="grid gap-1.5 max-[560px]:grid-cols-4 max-[560px]:w-full">
-        {NAV.map(({ href, label, icon: Icon, badgeKey }) => {
+        {(user.role === "ADMIN" ? [...NAV, { href: "/admin/users", label: "ผู้ใช้งาน", icon: Users }] : NAV).map(({ href, label, icon: Icon, badgeKey }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           const badge = badgeKey === "approvals" ? approvalCount : 0;
           return (

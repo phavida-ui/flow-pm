@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireUser } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { PageHeader } from "@/components/page-header";
@@ -33,6 +34,15 @@ export default async function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {user.role === "ADMIN" && (
+        <Link
+          href="/admin/users"
+          className="mt-4 inline-flex h-10 items-center rounded-[11px] border border-line bg-white px-4 text-xs font-extrabold text-[#536174] hover:bg-[#f7fafc]"
+        >
+          จัดการผู้ใช้งาน
+        </Link>
+      )}
     </div>
   );
 }
