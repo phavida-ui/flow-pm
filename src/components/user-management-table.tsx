@@ -42,13 +42,35 @@ export function UserManagementTable({
 }) {
   const [pending, startTransition] = useTransition();
   const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null);
+  const [reassignFor, setReassignFor] = useState<string | null>(null);
+  const [replacementId, setReplacementId] = useState<string>("");
 
   function handleDelete(u: Row) {
     if (!window.confirm(`ลบผู้ใช้ "${u.name}" ใช่หรือไม่? การกระทำนี้ย้อนกลับไม่ได้`)) return;
     setDeleteError(null);
     startTransition(async () => {
       const res = await deleteUserAction(u.id);
-      if (res?.error) setDeleteError({ id: u.id, message: res.error });
+      if (res.needsReplacement) {
+        setReassignFor(u.id);
+        setReplacementId("");
+      } else if (res.error) {
+        setDeleteError({ id: u.id, message: res.error });
+      }
+    });
+  }
+
+  function handleConfirmReassign(u: Row) {
+    if (!replacementId) return;
+    const replacement = users.find((x) => x.id === replacementId);
+    if (!window.confirm(`โอนงานทั้งหมดของ "${u.name}" ให้ "${replacement?.name}" แล้วลบ "${u.name}" ใช่หรือไม่?`)) return;
+    setDeleteError(null);
+    startTransition(async () => {
+      const res = await deleteUserAction(u.id, replacementId);
+      if (res.error) {
+        setDeleteError({ id: u.id, message: res.error });
+      } else {
+        setReassignFor(null);
+      }
     });
   }
 
@@ -142,16 +164,57 @@ export function UserManagementTable({
                   </button>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <button
-                    disabled={pending || isSelf}
-                    onClick={() => handleDelete(u)}
-                    aria-label="ลบผู้ใช้"
-                    className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft disabled:opacity-40"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                  {deleteError?.id === u.id && (
-                    <p className="mt-1 max-w-[220px] text-right text-[9px] font-semibold text-red">{deleteError.message}</p>
+                  {reassignFor === u.id ? (
+                    <div className="grid gap-1.5">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <select
+                          value={replacementId}
+                          onChange={(e) => setReplacementId(e.target.value)}
+                          disabled={pending}
+                          className="h-8 rounded-[8px] border border-line px-1.5 text-[10px]"
+                        >
+                          <option value="">โอนงานให้ใคร?</option>
+                          {users
+                            .filter((x) => x.id !== u.id)
+                            .map((x) => (
+                              <option key={x.id} value={x.id}>
+                                {x.name}
+                              </option>
+                            ))}
+                        </select>
+                        <button
+                          disabled={pending || !replacementId}
+                          onClick={() => handleConfirmReassign(u)}
+                          className="h-8 rounded-[8px] bg-red px-2 text-[10px] font-extrabold text-white disabled:opacity-40"
+                        >
+                          ลบ
+                        </button>
+                        <button
+                          disabled={pending}
+                          onClick={() => setReassignFor(null)}
+                          className="h-8 rounded-[8px] border border-line px-2 text-[10px] font-bold text-muted"
+                        >
+                          ยกเลิก
+                        </button>
+                      </div>
+                      <p className="text-right text-[9px] text-muted">
+                        {u.name} มีงาน/แคมเปญอยู่ — เลือกคนรับช่วงงานต่อก่อนลบ
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        disabled={pending || isSelf}
+                        onClick={() => handleDelete(u)}
+                        aria-label="ลบผู้ใช้"
+                        className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft disabled:opacity-40"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                      {deleteError?.id === u.id && (
+                        <p className="mt-1 max-w-[220px] text-right text-[9px] font-semibold text-red">{deleteError.message}</p>
+                      )}
+                    </>
                   )}
                 </td>
               </tr>

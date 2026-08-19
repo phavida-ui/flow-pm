@@ -55,15 +55,49 @@ export async function updateUser(
   return prisma.user.update({ where: { id: userId }, data });
 }
 
-export async function deleteUser(userId: string) {
-  try {
-    await prisma.user.delete({ where: { id: userId } });
-  } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
-      throw new Error("ลบไม่ได้เพราะผู้ใช้นี้มีข้อมูลเกี่ยวข้องอยู่ (งาน แคมเปญ ความคิดเห็น ฯลฯ) กรุณาปิดใช้งานแทน");
+export async function deleteUser(userId: string, replacementUserId?: string) {
+  if (!replacementUserId) {
+    try {
+      await prisma.user.delete({ where: { id: userId } });
+      return;
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
+        throw new Error("HAS_RELATED_DATA");
+      }
+      throw err;
     }
-    throw err;
   }
+
+  if (replacementUserId === userId) throw new Error("ผู้รับช่วงงานต้องเป็นคนละคนกับผู้ใช้ที่จะลบ");
+  const replacement = await prisma.user.findUnique({ where: { id: replacementUserId } });
+  if (!replacement) throw new Error("ไม่พบผู้ใช้ที่จะรับช่วงงาน");
+
+  await prisma.$transaction(async (tx) => {
+    // Operational + historical references that must point to a real user get reassigned
+    // to the replacement. Membership rows and the deleted user's own notifications are
+    // just removed rather than transferred.
+    await tx.campaign.updateMany({ where: { ownerId: userId }, data: { ownerId: replacementUserId } });
+    await tx.campaign.updateMany({ where: { createdBy: userId }, data: { createdBy: replacementUserId } });
+    await tx.workflowTemplate.updateMany({ where: { createdBy: userId }, data: { createdBy: replacementUserId } });
+    await tx.workflowTemplateTask.updateMany({ where: { defaultOwnerId: userId }, data: { defaultOwnerId: replacementUserId } });
+    await tx.workflowTemplateTask.updateMany({ where: { defaultApproverId: userId }, data: { defaultApproverId: replacementUserId } });
+    await tx.task.updateMany({ where: { ownerId: userId }, data: { ownerId: replacementUserId } });
+    await tx.task.updateMany({ where: { approverId: userId }, data: { approverId: replacementUserId } });
+    await tx.task.updateMany({ where: { createdBy: userId }, data: { createdBy: replacementUserId } });
+    await tx.subtask.updateMany({ where: { assigneeId: userId }, data: { assigneeId: replacementUserId } });
+    await tx.subtask.updateMany({ where: { createdBy: userId }, data: { createdBy: replacementUserId } });
+    await tx.approval.updateMany({ where: { approverId: userId }, data: { approverId: replacementUserId } });
+    await tx.taskHandoff.updateMany({ where: { fromUserId: userId }, data: { fromUserId: replacementUserId } });
+    await tx.taskHandoff.updateMany({ where: { toUserId: userId }, data: { toUserId: replacementUserId } });
+    await tx.activityLog.updateMany({ where: { actorId: userId }, data: { actorId: replacementUserId } });
+    await tx.comment.updateMany({ where: { userId }, data: { userId: replacementUserId } });
+    await tx.attachment.updateMany({ where: { uploadedBy: userId }, data: { uploadedBy: replacementUserId } });
+
+    await tx.campaignMember.deleteMany({ where: { userId } });
+    await tx.notification.deleteMany({ where: { userId } });
+
+    await tx.user.delete({ where: { id: userId } });
+  });
 }
 
 export async function createTeam(name: string) {
