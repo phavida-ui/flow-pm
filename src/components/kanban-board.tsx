@@ -7,20 +7,36 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
+import { TaskFormDialog } from "@/components/task-form-dialog";
 import { moveBoardStageAction } from "@/app/actions/board";
 import { BOARD_STAGE_ORDER, BOARD_STAGE_LABELS, nextBoardStage, prevBoardStage } from "@/lib/board-stage";
 import type { BoardStage, TaskStatus, TaskPriority } from "@prisma/client";
 
+type Option = { id: string; name: string };
 type Task = {
   id: string;
   name: string;
   status: TaskStatus;
   priority: TaskPriority | null;
   boardStage: BoardStage;
+  teamId: string | null;
+  ownerId: string | null;
+  approverId: string | null;
+  dueDate: Date | null;
   owner: { id: string; name: string } | null;
 };
 
-export function KanbanBoard({ campaignId, tasks }: { campaignId: string; tasks: Task[] }) {
+export function KanbanBoard({
+  campaignId,
+  tasks,
+  teams,
+  users,
+}: {
+  campaignId: string;
+  tasks: Task[];
+  teams: Option[];
+  users: Option[];
+}) {
   const [pending, startTransition] = useTransition();
 
   function move(taskId: string, stage: BoardStage) {
@@ -56,9 +72,27 @@ export function KanbanBoard({ campaignId, tasks }: { campaignId: string; tasks: 
               <div className="grid gap-2 min-h-[40px]">
                 {columnTasks.map((t) => (
                   <div key={t.id} className="grid gap-2 rounded-[12px] border border-line bg-white p-3">
-                    <Link href={`/tasks/${t.id}`} className="text-[12px] font-bold hover:text-primary-strong">
-                      {t.name}
-                    </Link>
+                    <div className="flex items-start justify-between gap-2">
+                      <Link href={`/tasks/${t.id}`} className="text-[12px] font-bold hover:text-primary-strong">
+                        {t.name}
+                      </Link>
+                      <TaskFormDialog
+                        mode="edit"
+                        campaignId={campaignId}
+                        teams={teams}
+                        users={users}
+                        dependencyOptions={[]}
+                        task={{
+                          id: t.id,
+                          name: t.name,
+                          teamId: t.teamId,
+                          ownerId: t.ownerId,
+                          approverId: t.approverId,
+                          dueDate: t.dueDate,
+                          priority: t.priority,
+                        }}
+                      />
+                    </div>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <StatusBadge status={t.status} />
                       {t.priority && <PriorityBadge priority={t.priority} />}
