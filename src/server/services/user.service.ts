@@ -1,4 +1,5 @@
 import "server-only";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { hashPassword } from "@/server/auth";
 import type { UserRole } from "@prisma/client";
@@ -49,6 +50,17 @@ export async function updateUser(
   }>
 ) {
   return prisma.user.update({ where: { id: userId }, data });
+}
+
+export async function deleteUser(userId: string) {
+  try {
+    await prisma.user.delete({ where: { id: userId } });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
+      throw new Error("ลบไม่ได้เพราะผู้ใช้นี้มีข้อมูลเกี่ยวข้องอยู่ (งาน แคมเปญ ความคิดเห็น ฯลฯ) กรุณาปิดใช้งานแทน");
+    }
+    throw err;
+  }
 }
 
 export async function createTeam(name: string) {

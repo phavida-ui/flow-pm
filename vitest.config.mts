@@ -15,5 +15,8 @@ export default defineConfig({
     environment: "node",
     setupFiles: ["./tests/setup.ts"],
     testTimeout: 20000,
+    // Integration tests share one live Postgres pooler connection budget across files;
+    // running files in parallel causes transient pool-contention timeouts.
+    fileParallelism: false,
   },
 });

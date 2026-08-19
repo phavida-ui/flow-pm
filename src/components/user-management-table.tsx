@@ -1,12 +1,14 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+import { Trash2 } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import {
   updateUserRoleAction,
   updateUserTeamAction,
   toggleUserApproverAction,
   toggleUserActiveAction,
+  deleteUserAction,
 } from "@/app/actions/user";
 import type { UserRole } from "@prisma/client";
 
@@ -37,10 +39,20 @@ export function UserManagementTable({
   currentUserId: string;
 }) {
   const [pending, startTransition] = useTransition();
+  const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null);
+
+  function handleDelete(u: Row) {
+    if (!window.confirm(`ลบผู้ใช้ "${u.name}" ใช่หรือไม่? การกระทำนี้ย้อนกลับไม่ได้`)) return;
+    setDeleteError(null);
+    startTransition(async () => {
+      const res = await deleteUserAction(u.id);
+      if (res?.error) setDeleteError({ id: u.id, message: res.error });
+    });
+  }
 
   return (
     <div className="overflow-x-auto rounded-[17px] border border-line bg-white">
-      <table className="w-full min-w-[760px] border-collapse text-[11px]">
+      <table className="w-full min-w-[820px] border-collapse text-[11px]">
         <thead>
           <tr className="border-b border-line text-left text-[9px] font-extrabold uppercase tracking-wide text-muted">
             <th className="px-4 py-3">ผู้ใช้</th>
@@ -48,6 +60,7 @@ export function UserManagementTable({
             <th className="px-4 py-3">ทีม</th>
             <th className="px-4 py-3">อนุมัติงานได้</th>
             <th className="px-4 py-3">สถานะ</th>
+            <th className="px-4 py-3" />
           </tr>
         </thead>
         <tbody>
@@ -114,6 +127,19 @@ export function UserManagementTable({
                   >
                     {u.active ? "ใช้งานอยู่" : "ปิดใช้งาน"}
                   </button>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <button
+                    disabled={pending || isSelf}
+                    onClick={() => handleDelete(u)}
+                    aria-label="ลบผู้ใช้"
+                    className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft disabled:opacity-40"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                  {deleteError?.id === u.id && (
+                    <p className="mt-1 max-w-[220px] text-right text-[9px] font-semibold text-red">{deleteError.message}</p>
+                  )}
                 </td>
               </tr>
             );

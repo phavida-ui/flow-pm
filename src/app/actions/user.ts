@@ -55,6 +55,21 @@ export async function toggleUserActiveAction(userId: string, active: boolean) {
   revalidatePath("/admin/users");
 }
 
+export async function deleteUserAction(userId: string): Promise<ActionState> {
+  const actor = await requireRole("ADMIN");
+  if (actor.id === userId) return { error: "ลบบัญชีของตัวเองไม่ได้" };
+
+  try {
+    await userService.deleteUser(userId);
+  } catch (err) {
+    if (err instanceof Error) return { error: err.message };
+    throw err;
+  }
+
+  revalidatePath("/admin/users");
+  return undefined;
+}
+
 export async function createTeamAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   await requireRole("ADMIN");
   const name = String(formData.get("name") ?? "").trim();
