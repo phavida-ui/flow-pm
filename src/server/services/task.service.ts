@@ -1,5 +1,5 @@
 import "server-only";
-import type { Prisma, PrismaClient, TaskStatus, TaskBlockedReason } from "@prisma/client";
+import type { Prisma, PrismaClient, TaskStatus, TaskBlockedReason, BoardStage } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { ForbiddenError } from "@/server/auth";
 import { logActivity } from "@/server/services/activity.service";
@@ -216,6 +216,18 @@ export async function markTaskBlocked(
   return prisma.task.update({
     where: { id: taskId },
     data: { blockedReason: reason, blockedNote: note?.trim() || null, blockedAt: new Date() },
+  });
+}
+
+export async function setBoardStage(taskId: string, stage: BoardStage) {
+  return prisma.task.update({ where: { id: taskId }, data: { boardStage: stage } });
+}
+
+export async function listBoardTasks(campaignId: string) {
+  return prisma.task.findMany({
+    where: { campaignId, status: { not: "CANCELLED" } },
+    include: { owner: { select: { id: true, name: true } } },
+    orderBy: { createdAt: "asc" },
   });
 }
 

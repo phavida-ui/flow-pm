@@ -9,6 +9,7 @@ export function CampaignTabs({ campaignId }: { campaignId: string }) {
   const base = `/campaigns/${campaignId}`;
   const tabs = [
     { href: base, label: "แผนงาน" },
+    { href: `${base}/board`, label: "บอร์ด" },
     { href: `${base}/timeline`, label: "ไทม์ไลน์" },
     { href: `${base}/activity`, label: "กิจกรรม" },
   ];

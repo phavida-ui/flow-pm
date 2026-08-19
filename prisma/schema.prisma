@@ -68,6 +68,14 @@ enum TaskBlockedReason {
   OTHER
 }
 
+enum BoardStage {
+  BRIEF
+  DRAFT_1
+  DRAFT_2
+  DRAFT_3
+  DONE
+}
+
 enum NotificationType {
   TASK_ASSIGNED
   TASK_READY
@@ -249,6 +257,7 @@ model Task {
   approverId     String?
   status         TaskStatus         @default(PLANNED)
   priority       TaskPriority?
+  boardStage     BoardStage         @default(BRIEF)
   blockedReason  TaskBlockedReason?
   blockedNote    String?
   blockedAt      DateTime?
