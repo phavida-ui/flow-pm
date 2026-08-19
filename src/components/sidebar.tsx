@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
-import { Home, LayoutGrid, CheckCircle2, GitBranch, Bell, Settings, LogOut, Users } from "lucide-react";
+import { Home, LayoutGrid, CheckCircle2, GitBranch, Bell, Settings, LogOut, Users, BookOpen } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { logoutAction } from "@/app/actions/auth";
 
@@ -74,6 +74,13 @@ export function Sidebar({
               {unreadCount}
             </span>
           )}
+        </Link>
+        <Link
+          href="/guide"
+          className="grid grid-cols-[26px_1fr_auto] items-center rounded-[13px] p-3 text-left text-[13px] font-bold text-[#667486] hover:bg-[#f7fafc] max-[1000px]:grid-cols-1 max-[1000px]:place-items-center"
+        >
+          <BookOpen size={17} />
+          <span className="max-[1000px]:hidden">วิธีใช้งาน</span>
         </Link>
         <Link
           href="/settings"
