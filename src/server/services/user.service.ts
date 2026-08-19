@@ -17,6 +17,7 @@ export async function listTeams() {
 
 export async function createUser(params: {
   name: string;
+  title?: string | null;
   email: string;
   password: string;
   role: UserRole;
@@ -30,6 +31,7 @@ export async function createUser(params: {
   return prisma.user.create({
     data: {
       name: params.name,
+      title: params.title?.trim() || null,
       email: params.email,
       passwordHash,
       role: params.role,
@@ -43,6 +45,7 @@ export async function updateUser(
   userId: string,
   data: Partial<{
     name: string;
+    title: string | null;
     role: UserRole;
     teamId: string | null;
     isApprover: boolean;

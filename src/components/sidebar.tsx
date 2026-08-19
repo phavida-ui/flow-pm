@@ -19,7 +19,7 @@ export function Sidebar({
   approvalCount,
   unreadCount,
 }: {
-  user: { name: string; role: string; teamName: string | null };
+  user: { name: string; title: string | null; role: string; teamName: string | null };
   approvalCount: number;
   unreadCount: number;
 }) {
@@ -87,7 +87,7 @@ export function Sidebar({
           <Avatar name={user.name} />
           <div className="grid gap-0.5 max-[1000px]:hidden">
             <strong className="text-xs">{user.name}</strong>
-            <span className="text-[10px] text-muted">{user.teamName ?? user.role}</span>
+            <span className="text-[10px] text-muted">{user.title ?? user.teamName ?? user.role}</span>
           </div>
         </div>
         <form action={logoutAction} className="max-[1000px]:flex max-[1000px]:justify-center">

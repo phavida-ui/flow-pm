@@ -17,7 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen">
       <Sidebar
-        user={{ name: user.name, role: user.role, teamName: team?.name ?? null }}
+        user={{ name: user.name, title: user.title, role: user.role, teamName: team?.name ?? null }}
         approvalCount={approvalCount}
         unreadCount={unread}
       />

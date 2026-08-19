@@ -60,7 +60,7 @@ async function getSessionUserId(): Promise<string | null> {
 
 export type SessionUser = Pick<
   User,
-  "id" | "name" | "email" | "role" | "isApprover" | "teamId" | "avatarUrl"
+  "id" | "name" | "title" | "email" | "role" | "isApprover" | "teamId" | "avatarUrl"
 >;
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
@@ -72,6 +72,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     select: {
       id: true,
       name: true,
+      title: true,
       email: true,
       role: true,
       isApprover: true,

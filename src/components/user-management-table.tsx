@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import {
   updateUserRoleAction,
+  updateUserTitleAction,
   updateUserTeamAction,
   toggleUserApproverAction,
   toggleUserActiveAction,
@@ -16,6 +17,7 @@ type Team = { id: string; name: string };
 type Row = {
   id: string;
   name: string;
+  title: string | null;
   email: string;
   role: UserRole;
   isApprover: boolean;
@@ -74,6 +76,17 @@ export function UserManagementTable({
                     <div>
                       <div className="font-bold">{u.name}</div>
                       <div className="text-[10px] text-muted">{u.email}</div>
+                      <input
+                        defaultValue={u.title ?? ""}
+                        placeholder="เพิ่มตำแหน่ง…"
+                        disabled={pending}
+                        onBlur={(e) => {
+                          if (e.target.value !== (u.title ?? "")) {
+                            startTransition(() => updateUserTitleAction(u.id, e.target.value));
+                          }
+                        }}
+                        className="mt-0.5 h-6 w-full rounded-md border border-transparent bg-transparent px-1 text-[10px] font-semibold text-primary-strong outline-none hover:border-line focus:border-primary focus:bg-white"
+                      />
                     </div>
                   </div>
                 </td>

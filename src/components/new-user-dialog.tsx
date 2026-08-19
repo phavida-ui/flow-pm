@@ -24,10 +24,16 @@ export function NewUserDialog({ teams }: { teams: Team[] }) {
       title="เพิ่มผู้ใช้งาน"
     >
       <form action={formAction} className="grid gap-3.5 p-5">
-        <label className="grid gap-1.5">
-          <span className="text-[10px] font-extrabold text-[#59677a]">ชื่อ</span>
-          <input name="name" required className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
-        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="grid gap-1.5">
+            <span className="text-[10px] font-extrabold text-[#59677a]">ชื่อ</span>
+            <input name="name" required className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+          </label>
+          <label className="grid gap-1.5">
+            <span className="text-[10px] font-extrabold text-[#59677a]">ตำแหน่ง</span>
+            <input name="title" placeholder="เช่น กราฟิกดีไซน์" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+          </label>
+        </div>
         <label className="grid gap-1.5">
           <span className="text-[10px] font-extrabold text-[#59677a]">อีเมล</span>
           <input name="email" type="email" required className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />

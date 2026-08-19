@@ -11,6 +11,7 @@ export async function createUserAction(_prev: ActionState, formData: FormData): 
   await requireRole("ADMIN");
 
   const name = String(formData.get("name") ?? "").trim();
+  const title = formData.get("title") ? String(formData.get("title")) : null;
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const role = String(formData.get("role") ?? "MEMBER") as UserRole;
@@ -21,7 +22,7 @@ export async function createUserAction(_prev: ActionState, formData: FormData): 
   if (password.length < 8) return { error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" };
 
   try {
-    await userService.createUser({ name, email, password, role, teamId, isApprover });
+    await userService.createUser({ name, title, email, password, role, teamId, isApprover });
   } catch (err) {
     if (err instanceof Error) return { error: err.message };
     throw err;
@@ -29,6 +30,12 @@ export async function createUserAction(_prev: ActionState, formData: FormData): 
 
   revalidatePath("/admin/users");
   return undefined;
+}
+
+export async function updateUserTitleAction(userId: string, title: string) {
+  await requireRole("ADMIN");
+  await userService.updateUser(userId, { title: title.trim() || null });
+  revalidatePath("/admin/users");
 }
 
 export async function updateUserRoleAction(userId: string, role: UserRole) {

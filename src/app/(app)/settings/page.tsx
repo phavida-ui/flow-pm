@@ -16,6 +16,7 @@ export default async function SettingsPage() {
           <Avatar name={user.name} size={44} />
           <div>
             <strong className="block text-sm">{user.name}</strong>
+            {user.title && <span className="block text-[11px] font-semibold text-primary-strong">{user.title}</span>}
             <span className="text-xs text-muted">{user.email}</span>
           </div>
         </div>
