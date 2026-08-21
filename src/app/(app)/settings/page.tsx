@@ -3,6 +3,7 @@ import { requireUser } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { PageHeader } from "@/components/page-header";
 import { Avatar } from "@/components/avatar";
+import { EditNameForm, ChangePasswordForm } from "@/components/profile-settings";
 
 export default async function SettingsPage() {
   const user = await requireUser();
@@ -33,6 +34,18 @@ export default async function SettingsPage() {
             <span className="block text-[9px] font-bold text-muted">สามารถอนุมัติงานได้</span>
             <strong>{user.isApprover ? "ใช่" : "ไม่ใช่"}</strong>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid max-w-md gap-4">
+        <div className="rounded-[17px] border border-line bg-white p-6">
+          <h3 className="mb-3 text-sm font-extrabold">แก้ไขชื่อ</h3>
+          <EditNameForm name={user.name} />
+        </div>
+
+        <div className="rounded-[17px] border border-line bg-white p-6">
+          <h3 className="mb-3 text-sm font-extrabold">เปลี่ยนรหัสผ่าน</h3>
+          <ChangePasswordForm />
         </div>
       </div>
 

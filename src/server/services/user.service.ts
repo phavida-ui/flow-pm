@@ -1,7 +1,7 @@
 import "server-only";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db";
-import { hashPassword } from "@/server/auth";
+import { hashPassword, verifyPassword } from "@/server/auth";
 import type { UserRole } from "@prisma/client";
 
 export async function listUsers() {
@@ -98,6 +98,21 @@ export async function deleteUser(userId: string, replacementUserId?: string) {
 
     await tx.user.delete({ where: { id: userId } });
   });
+}
+
+export async function updateOwnName(userId: string, name: string) {
+  const trimmed = name.trim();
+  if (!trimmed) throw new Error("กรุณากรอกชื่อ");
+  return prisma.user.update({ where: { id: userId }, data: { name: trimmed } });
+}
+
+export async function changeOwnPassword(userId: string, currentPassword: string, newPassword: string) {
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+  const valid = await verifyPassword(currentPassword, user.passwordHash);
+  if (!valid) throw new Error("รหัสผ่านปัจจุบันไม่ถูกต้อง");
+
+  const passwordHash = await hashPassword(newPassword);
+  return prisma.user.update({ where: { id: userId }, data: { passwordHash } });
 }
 
 export async function createTeam(name: string) {
