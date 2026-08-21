@@ -16,6 +16,7 @@ type Option = { id: string; name: string };
 type Row = {
   id: string;
   name: string;
+  description: string | null;
   status: TaskStatus;
   priority: TaskPriority | null;
   dueDate: Date | null;
@@ -87,6 +88,7 @@ function TaskTable({
                       task={{
                         id: t.id,
                         name: t.name,
+                        description: t.description,
                         teamId: t.team?.id ?? null,
                         ownerId: t.owner?.id ?? null,
                         approverId: t.approver?.id ?? null,

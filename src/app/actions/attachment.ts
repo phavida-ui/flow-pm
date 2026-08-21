@@ -3,17 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/server/auth";
 import * as attachmentService from "@/server/services/attachment.service";
+import { isValidHttpUrl } from "@/lib/url";
 
 export type ActionState = { error?: string } | undefined;
-
-function isValidUrl(value: string) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
 
 export async function addAttachmentAction(
   taskId: string,
@@ -25,7 +17,7 @@ export async function addAttachmentAction(
   const fileName = String(formData.get("fileName") ?? "").trim() || fileUrl;
 
   if (!fileUrl) return { error: "กรุณาใส่ลิงก์" };
-  if (!isValidUrl(fileUrl)) return { error: "ลิงก์ไม่ถูกต้อง กรุณาใส่ URL ที่ขึ้นต้นด้วย http:// หรือ https://" };
+  if (!isValidHttpUrl(fileUrl)) return { error: "ลิงก์ไม่ถูกต้อง กรุณาใส่ URL ที่ขึ้นต้นด้วย http:// หรือ https://" };
 
   await attachmentService.addAttachment(taskId, user.id, fileName, fileUrl);
   revalidatePath(`/tasks/${taskId}`);

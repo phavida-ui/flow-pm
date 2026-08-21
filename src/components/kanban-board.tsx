@@ -16,6 +16,7 @@ type Option = { id: string; name: string };
 type Task = {
   id: string;
   name: string;
+  description: string | null;
   status: TaskStatus;
   priority: TaskPriority | null;
   boardStage: BoardStage;
@@ -85,6 +86,7 @@ export function KanbanBoard({
                         task={{
                           id: t.id,
                           name: t.name,
+                          description: t.description,
                           teamId: t.teamId,
                           ownerId: t.ownerId,
                           approverId: t.approverId,

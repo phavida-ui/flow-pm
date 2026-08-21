@@ -96,8 +96,23 @@ export function QuickAddTaskDialog({
             </div>
             <label className="grid gap-1.5">
               <span className="text-[10px] font-extrabold text-[#59677a]">รายละเอียด</span>
-              <input name="description" placeholder="ไม่บังคับ" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+              <textarea
+                name="description"
+                rows={3}
+                placeholder="ไม่บังคับ"
+                className="rounded-[10px] border border-line p-3 text-[11px] outline-none focus:border-primary"
+              />
             </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="grid gap-1.5">
+                <span className="text-[10px] font-extrabold text-[#59677a]">ชื่อไฟล์แนบ (ไม่บังคับ)</span>
+                <input name="attachmentName" placeholder="เช่น ไฟล์งานออกแบบ" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-[10px] font-extrabold text-[#59677a]">ลิงก์แนบไฟล์ (ไม่บังคับ)</span>
+                <input name="attachmentUrl" placeholder="วางลิงก์ Google Drive ที่นี่…" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+              </label>
+            </div>
           </>
         )}
 

@@ -24,6 +24,7 @@ export function TaskFormDialog({
   task?: {
     id: string;
     name: string;
+    description?: string | null;
     teamId: string | null;
     ownerId: string | null;
     approverId: string | null;
@@ -68,6 +69,17 @@ export function TaskFormDialog({
             defaultValue={task?.name}
             placeholder="เช่น เตรียมแคปชั่นสำหรับโฆษณา"
             className="h-[41px] rounded-[10px] border border-line px-3 text-[11px] outline-none focus:border-primary focus:ring-4 focus:ring-primary-soft"
+          />
+        </label>
+
+        <label className="grid gap-1.5">
+          <span className="text-[10px] font-extrabold text-[#59677a]">รายละเอียด</span>
+          <textarea
+            name="description"
+            defaultValue={task?.description ?? ""}
+            rows={3}
+            placeholder="อธิบายงานนี้ (ไม่บังคับ)"
+            className="rounded-[10px] border border-line p-3 text-[11px] outline-none focus:border-primary focus:ring-4 focus:ring-primary-soft"
           />
         </label>
 
@@ -139,17 +151,30 @@ export function TaskFormDialog({
         </label>
 
         {mode === "create" && (
-          <label className="grid gap-1.5">
-            <span className="text-[10px] font-extrabold text-[#59677a]">ต้องทำอะไรให้เสร็จก่อนเริ่มงานนี้?</span>
-            <select name="dependsOn" defaultValue="" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]">
-              <option value="">ไม่มี — เริ่มงานนี้ได้ทันที</option>
-              {dependencyOptions.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <>
+            <label className="grid gap-1.5">
+              <span className="text-[10px] font-extrabold text-[#59677a]">ต้องทำอะไรให้เสร็จก่อนเริ่มงานนี้?</span>
+              <select name="dependsOn" defaultValue="" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]">
+                <option value="">ไม่มี — เริ่มงานนี้ได้ทันที</option>
+                {dependencyOptions.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="grid gap-1.5">
+                <span className="text-[10px] font-extrabold text-[#59677a]">ชื่อไฟล์แนบ (ไม่บังคับ)</span>
+                <input name="attachmentName" placeholder="เช่น ไฟล์งานออกแบบ" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="text-[10px] font-extrabold text-[#59677a]">ลิงก์แนบไฟล์ (ไม่บังคับ)</span>
+                <input name="attachmentUrl" placeholder="วางลิงก์ Google Drive ที่นี่…" className="h-[41px] rounded-[10px] border border-line px-3 text-[11px]" />
+              </label>
+            </div>
+          </>
         )}
 
         <div className="rounded-[10px] border border-[#d8ebf9] bg-[#f5fbff] px-[11px] py-2.5 text-[9px] text-[#52728a]">

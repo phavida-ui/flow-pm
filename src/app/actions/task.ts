@@ -5,6 +5,16 @@ import { requireUser, isManagerOrAdmin, ForbiddenError } from "@/server/auth";
 import { prisma } from "@/server/db";
 import * as taskService from "@/server/services/task.service";
 import * as dependencyService from "@/server/services/dependency.service";
+import * as attachmentService from "@/server/services/attachment.service";
+import { isValidHttpUrl } from "@/lib/url";
+
+function readAttachment(formData: FormData): { error?: string; fileName?: string; fileUrl?: string } {
+  const fileUrl = String(formData.get("attachmentUrl") ?? "").trim();
+  if (!fileUrl) return {};
+  if (!isValidHttpUrl(fileUrl)) return { error: "ลิงก์ไม่ถูกต้อง กรุณาใส่ URL ที่ขึ้นต้นด้วย http:// หรือ https://" };
+  const fileName = String(formData.get("attachmentName") ?? "").trim() || fileUrl;
+  return { fileName, fileUrl };
+}
 
 export type ActionState = { error?: string } | undefined;
 
@@ -24,14 +34,19 @@ export async function createTaskAction(campaignId: string | null, _prev: ActionS
     const name = String(formData.get("name") ?? "").trim();
     if (!name) return { error: "กรุณากรอกชื่องาน" };
 
+    const attachment = readAttachment(formData);
+    if (attachment.error) return { error: attachment.error };
+
     const dueDateRaw = formData.get("dueDate");
     const dependsOn = formData.get("dependsOn") ? String(formData.get("dependsOn")) : null;
+    const description = formData.get("description") ? String(formData.get("description")) : undefined;
 
     const priorityRaw = formData.get("priority") ? String(formData.get("priority")) : null;
 
     const task = await taskService.createTask({
       campaignId,
       name,
+      description,
       teamId: formData.get("teamId") ? String(formData.get("teamId")) : null,
       ownerId: formData.get("ownerId") ? String(formData.get("ownerId")) : user.id,
       approverId: formData.get("approverId") ? String(formData.get("approverId")) : null,
@@ -42,6 +57,10 @@ export async function createTaskAction(campaignId: string | null, _prev: ActionS
 
     if (dependsOn && campaignId) {
       await dependencyService.addDependency(campaignId, task.id, dependsOn);
+    }
+
+    if (attachment.fileUrl) {
+      await attachmentService.addAttachment(task.id, user.id, attachment.fileName!, attachment.fileUrl);
     }
   } catch (err) {
     if (err instanceof Error) return { error: err.message };
@@ -61,12 +80,15 @@ export async function quickAddTaskAction(_prev: ActionState, formData: FormData)
   const campaignId = formData.get("campaignId") ? String(formData.get("campaignId")) : null;
   if (campaignId) await assertPlanningEditable(campaignId);
 
+  const attachment = readAttachment(formData);
+  if (attachment.error) return { error: attachment.error };
+
   const priorityRaw = formData.get("priority") ? String(formData.get("priority")) : null;
   const dueDateRaw = formData.get("dueDate") ? String(formData.get("dueDate")) : null;
   const description = formData.get("description") ? String(formData.get("description")) : undefined;
 
   try {
-    await taskService.createTask({
+    const task = await taskService.createTask({
       campaignId,
       name,
       description,
@@ -75,6 +97,10 @@ export async function quickAddTaskAction(_prev: ActionState, formData: FormData)
       priority: (priorityRaw as "LOW" | "MEDIUM" | "HIGH" | "URGENT" | null) || null,
       createdBy: user.id,
     });
+
+    if (attachment.fileUrl) {
+      await attachmentService.addAttachment(task.id, user.id, attachment.fileName!, attachment.fileUrl);
+    }
   } catch (err) {
     if (err instanceof Error) return { error: err.message };
     throw err;
@@ -92,6 +118,7 @@ export async function updateTaskAction(taskId: string, campaignId: string, _prev
 
     await taskService.updateTask(taskId, user.id, {
       name: formData.get("name") ? String(formData.get("name")) : undefined,
+      description: formData.get("description") ? String(formData.get("description")) : null,
       teamId: formData.get("teamId") ? String(formData.get("teamId")) : null,
       ownerId: formData.get("ownerId") ? String(formData.get("ownerId")) : null,
       approverId: formData.get("approverId") ? String(formData.get("approverId")) : null,
