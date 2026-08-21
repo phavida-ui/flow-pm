@@ -135,10 +135,13 @@ export async function updateTaskAction(taskId: string, campaignId: string, _prev
 }
 
 export async function deleteTaskAction(taskId: string, campaignId: string) {
-  await requireUser();
-  await assertPlanningEditable(campaignId);
-  await taskService.deleteTask(taskId);
+  const user = await requireUser();
+  const canManage = isManagerOrAdmin(user);
+  if (!canManage) await assertPlanningEditable(campaignId);
+  await taskService.deleteTask(taskId, { force: canManage });
   revalidatePath(`/campaigns/${campaignId}`);
+  revalidatePath(`/campaigns/${campaignId}/board`);
+  revalidatePath("/my-work");
 }
 
 export async function addDependencyAction(taskId: string, campaignId: string, dependsOnTaskId: string) {

@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth";
+import { requireUser, isManagerOrAdmin } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { PlanningBoard } from "@/components/planning-board";
 
@@ -28,6 +28,7 @@ export default async function CampaignPlanPage({ params }: { params: Promise<{ i
     <PlanningBoard
       campaignId={id}
       campaignEditable={editable}
+      canManage={isManagerOrAdmin(user)}
       tasks={tasks}
       teams={teams}
       users={users}

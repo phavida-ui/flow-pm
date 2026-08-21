@@ -1,14 +1,15 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { StatusBadge } from "@/components/status-badge";
 import { PriorityBadge } from "@/components/priority-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { moveBoardStageAction } from "@/app/actions/board";
+import { deleteTaskAction } from "@/app/actions/task";
 import { BOARD_STAGE_ORDER, BOARD_STAGE_LABELS, nextBoardStage, prevBoardStage } from "@/lib/board-stage";
 import type { BoardStage, TaskStatus, TaskPriority } from "@prisma/client";
 
@@ -32,16 +33,31 @@ export function KanbanBoard({
   tasks,
   teams,
   users,
+  canManage,
 }: {
   campaignId: string;
   tasks: Task[];
   teams: Option[];
   users: Option[];
+  canManage: boolean;
 }) {
   const [pending, startTransition] = useTransition();
+  const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null);
 
   function move(taskId: string, stage: BoardStage) {
     startTransition(() => moveBoardStageAction(taskId, campaignId, stage));
+  }
+
+  function handleDelete(t: Task) {
+    if (!window.confirm(`ลบงาน "${t.name}" ใช่หรือไม่? การกระทำนี้ย้อนกลับไม่ได้`)) return;
+    setDeleteError(null);
+    startTransition(async () => {
+      try {
+        await deleteTaskAction(t.id, campaignId);
+      } catch (err) {
+        setDeleteError({ id: t.id, message: err instanceof Error ? err.message : "เกิดข้อผิดพลาด" });
+      }
+    });
   }
 
   return (
@@ -77,24 +93,37 @@ export function KanbanBoard({
                       <Link href={`/tasks/${t.id}`} className="text-[12px] font-bold hover:text-primary-strong">
                         {t.name}
                       </Link>
-                      <TaskFormDialog
-                        mode="edit"
-                        campaignId={campaignId}
-                        teams={teams}
-                        users={users}
-                        dependencyOptions={[]}
-                        task={{
-                          id: t.id,
-                          name: t.name,
-                          description: t.description,
-                          teamId: t.teamId,
-                          ownerId: t.ownerId,
-                          approverId: t.approverId,
-                          dueDate: t.dueDate,
-                          priority: t.priority,
-                        }}
-                      />
+                      <div className="flex flex-none gap-1">
+                        <TaskFormDialog
+                          mode="edit"
+                          campaignId={campaignId}
+                          teams={teams}
+                          users={users}
+                          dependencyOptions={[]}
+                          task={{
+                            id: t.id,
+                            name: t.name,
+                            description: t.description,
+                            teamId: t.teamId,
+                            ownerId: t.ownerId,
+                            approverId: t.approverId,
+                            dueDate: t.dueDate,
+                            priority: t.priority,
+                          }}
+                        />
+                        {canManage && (
+                          <button
+                            disabled={pending}
+                            onClick={() => handleDelete(t)}
+                            aria-label="ลบงาน"
+                            className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft disabled:opacity-40"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
                     </div>
+                    {deleteError?.id === t.id && <p className="text-[9px] font-semibold text-red">{deleteError.message}</p>}
                     <div className="flex flex-wrap items-center gap-1.5">
                       <StatusBadge status={t.status} />
                       {t.priority && <PriorityBadge priority={t.priority} />}

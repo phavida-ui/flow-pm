@@ -1,5 +1,6 @@
 import "server-only";
-import type { Prisma, PrismaClient, TaskStatus, TaskBlockedReason, BoardStage } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import type { PrismaClient, TaskStatus, TaskBlockedReason, BoardStage } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { ForbiddenError } from "@/server/auth";
 import { logActivity } from "@/server/services/activity.service";
@@ -109,12 +110,20 @@ export async function updateTask(
   return task;
 }
 
-export async function deleteTask(taskId: string) {
+export async function deleteTask(taskId: string, opts?: { force?: boolean }) {
   const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-  if (task.status !== "PLANNED") {
+  if (!opts?.force && task.status !== "PLANNED") {
     throw new Error("ลบได้เฉพาะงานที่ยังอยู่ในสถานะวางแผนแล้วเท่านั้น");
   }
-  return prisma.task.delete({ where: { id: taskId } });
+
+  try {
+    return await prisma.task.delete({ where: { id: taskId } });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
+      throw new Error("ลบไม่ได้เพราะงานนี้มีประวัติการส่งต่องานที่เกี่ยวข้องอยู่แล้ว");
+    }
+    throw err;
+  }
 }
 
 export async function startTask(taskId: string, actorId: string) {

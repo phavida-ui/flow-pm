@@ -63,7 +63,7 @@ export function QuickAddTaskDialog({
 
         {!advanced ? (
           <button type="button" onClick={() => setAdvanced(true)} className="text-left text-[10px] font-bold text-primary-strong underline">
-            ตัวเลือกเพิ่มเติม
+            เพิ่มรายละเอียดของงาน
           </button>
         ) : (
           <>

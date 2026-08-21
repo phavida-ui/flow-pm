@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { Search, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
@@ -30,15 +30,32 @@ function TaskTable({
   rows,
   campaignId,
   campaignEditable,
+  canManage,
   teams,
   users,
 }: {
   rows: Row[];
   campaignId: string;
   campaignEditable: boolean;
+  canManage: boolean;
   teams: Option[];
   users: Option[];
 }) {
+  const [pending, startTransition] = useTransition();
+  const [deleteError, setDeleteError] = useState<{ id: string; message: string } | null>(null);
+
+  function handleDelete(t: Row) {
+    if (!window.confirm(`ลบงาน "${t.name}" ใช่หรือไม่? การกระทำนี้ย้อนกลับไม่ได้`)) return;
+    setDeleteError(null);
+    startTransition(async () => {
+      try {
+        await deleteTaskAction(t.id, campaignId);
+      } catch (err) {
+        setDeleteError({ id: t.id, message: err instanceof Error ? err.message : "เกิดข้อผิดพลาด" });
+      }
+    });
+  }
+
   return (
     <div className="overflow-x-auto rounded-[17px] border border-line bg-white">
       <table className="w-full min-w-[900px] border-collapse text-[11px]">
@@ -77,30 +94,38 @@ function TaskTable({
                 <StatusBadge status={t.status} />
               </td>
               <td className="px-4 py-3">
-                {campaignEditable && t.status === "PLANNED" && (
-                  <div className="flex justify-end gap-1.5">
-                    <TaskFormDialog
-                      mode="edit"
-                      campaignId={campaignId}
-                      teams={teams}
-                      users={users}
-                      dependencyOptions={[]}
-                      task={{
-                        id: t.id,
-                        name: t.name,
-                        description: t.description,
-                        teamId: t.team?.id ?? null,
-                        ownerId: t.owner?.id ?? null,
-                        approverId: t.approver?.id ?? null,
-                        dueDate: t.dueDate,
-                        priority: t.priority,
-                      }}
-                    />
-                    <form action={deleteTaskAction.bind(null, t.id, campaignId)}>
-                      <button className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft" aria-label="ลบงาน">
+                {((campaignEditable && t.status === "PLANNED") || canManage) && (
+                  <div className="grid justify-items-end gap-1">
+                    <div className="flex justify-end gap-1.5">
+                      <TaskFormDialog
+                        mode="edit"
+                        campaignId={campaignId}
+                        teams={teams}
+                        users={users}
+                        dependencyOptions={[]}
+                        task={{
+                          id: t.id,
+                          name: t.name,
+                          description: t.description,
+                          teamId: t.team?.id ?? null,
+                          ownerId: t.owner?.id ?? null,
+                          approverId: t.approver?.id ?? null,
+                          dueDate: t.dueDate,
+                          priority: t.priority,
+                        }}
+                      />
+                      <button
+                        disabled={pending}
+                        onClick={() => handleDelete(t)}
+                        className="grid h-8 w-8 place-items-center rounded-lg border border-line text-[#b14a4a] hover:bg-red-soft disabled:opacity-40"
+                        aria-label="ลบงาน"
+                      >
                         <Trash2 size={13} />
                       </button>
-                    </form>
+                    </div>
+                    {deleteError?.id === t.id && (
+                      <p className="max-w-[200px] text-right text-[9px] font-semibold text-red">{deleteError.message}</p>
+                    )}
                   </div>
                 )}
               </td>
@@ -122,6 +147,7 @@ function TaskTable({
 export function PlanningBoard({
   campaignId,
   campaignEditable,
+  canManage,
   tasks,
   teams,
   users,
@@ -129,6 +155,7 @@ export function PlanningBoard({
 }: {
   campaignId: string;
   campaignEditable: boolean;
+  canManage: boolean;
   tasks: Row[];
   teams: Option[];
   users: Option[];
@@ -198,7 +225,7 @@ export function PlanningBoard({
       </div>
 
       {campaignEditable ? (
-        <TaskTable rows={filtered} campaignId={campaignId} campaignEditable={campaignEditable} teams={teams} users={users} />
+        <TaskTable rows={filtered} campaignId={campaignId} campaignEditable={campaignEditable} canManage={canManage} teams={teams} users={users} />
       ) : (
         <div className="grid gap-5">
           {SIMPLE_STATUS_ORDER.map((simple) => {
@@ -210,7 +237,7 @@ export function PlanningBoard({
                   <SimpleStatusBadge status={simple} />
                   <span className="text-[10px] font-bold text-muted">{rows.length} งาน</span>
                 </div>
-                <TaskTable rows={rows} campaignId={campaignId} campaignEditable={campaignEditable} teams={teams} users={users} />
+                <TaskTable rows={rows} campaignId={campaignId} campaignEditable={campaignEditable} canManage={canManage} teams={teams} users={users} />
               </div>
             );
           })}
@@ -225,12 +252,12 @@ export function PlanningBoard({
                   </span>
                   <span className="text-[10px] font-bold text-muted">{notStarted.length} งาน</span>
                 </div>
-                <TaskTable rows={notStarted} campaignId={campaignId} campaignEditable={campaignEditable} teams={teams} users={users} />
+                <TaskTable rows={notStarted} campaignId={campaignId} campaignEditable={campaignEditable} canManage={canManage} teams={teams} users={users} />
               </div>
             );
           })()}
           {filtered.length === 0 && (
-            <TaskTable rows={[]} campaignId={campaignId} campaignEditable={campaignEditable} teams={teams} users={users} />
+            <TaskTable rows={[]} campaignId={campaignId} campaignEditable={campaignEditable} canManage={canManage} teams={teams} users={users} />
           )}
         </div>
       )}
