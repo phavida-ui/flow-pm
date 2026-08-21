@@ -16,7 +16,7 @@ export function TaskFormDialog({
   task,
   lockOwnerTo,
 }: {
-  campaignId: string;
+  campaignId: string | null;
   teams: Option[];
   users: Option[];
   dependencyOptions: Option[];

@@ -11,6 +11,8 @@ import { ReassignControls } from "@/components/reassign-controls";
 import { CommentForm } from "@/components/comment-form";
 import { SubtaskList } from "@/components/subtask-list";
 import { AttachmentList } from "@/components/attachment-list";
+import { TaskFormDialog } from "@/components/task-form-dialog";
+import { DeleteTaskButton } from "@/components/delete-task-button";
 import { formatDue, formatDateTime } from "@/lib/format";
 import { Avatar } from "@/components/avatar";
 import { listSubtasks } from "@/server/services/subtask.service";
@@ -36,8 +38,9 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   if (!task) notFound();
 
-  const [users, subtasks, attachments] = await Promise.all([
+  const [users, teams, subtasks, attachments] = await Promise.all([
     prisma.user.findMany({ where: { active: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.team.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
     listSubtasks(task.id),
     listAttachments(task.id),
   ]);
@@ -48,7 +51,39 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <PageHeader eyebrow={task.campaign?.name ?? "งานเดี่ยว"} title={task.name} />
+      <PageHeader
+        eyebrow={task.campaign?.name ?? "งานเดี่ยว"}
+        title={task.name}
+        actions={
+          <div className="flex items-start gap-2">
+            <TaskFormDialog
+              mode="edit"
+              campaignId={task.campaign?.id ?? null}
+              teams={teams}
+              users={users}
+              dependencyOptions={[]}
+              task={{
+                id: task.id,
+                name: task.name,
+                description: task.description,
+                teamId: task.teamId,
+                ownerId: task.ownerId,
+                approverId: task.approverId,
+                dueDate: task.dueDate,
+                priority: task.priority,
+              }}
+            />
+            {canManage && (
+              <DeleteTaskButton
+                taskId={task.id}
+                campaignId={task.campaign?.id ?? null}
+                taskName={task.name}
+                redirectTo={task.campaign ? `/campaigns/${task.campaign.id}` : "/my-work"}
+              />
+            )}
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-[1.4fr_.6fr] gap-5 max-[900px]:grid-cols-1">
         <div className="grid gap-4">

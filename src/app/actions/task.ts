@@ -111,7 +111,7 @@ export async function quickAddTaskAction(_prev: ActionState, formData: FormData)
   return undefined;
 }
 
-export async function updateTaskAction(taskId: string, campaignId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
+export async function updateTaskAction(taskId: string, campaignId: string | null, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser();
   try {
     const priorityRaw = formData.get("priority") ? String(formData.get("priority")) : null;
@@ -129,18 +129,24 @@ export async function updateTaskAction(taskId: string, campaignId: string, _prev
     if (err instanceof Error) return { error: err.message };
     throw err;
   }
-  revalidatePath(`/campaigns/${campaignId}`);
+  if (campaignId) revalidatePath(`/campaigns/${campaignId}`);
   revalidatePath(`/tasks/${taskId}`);
   return undefined;
 }
 
-export async function deleteTaskAction(taskId: string, campaignId: string) {
+export async function deleteTaskAction(taskId: string, campaignId: string | null) {
   const user = await requireUser();
   const canManage = isManagerOrAdmin(user);
-  if (!canManage) await assertPlanningEditable(campaignId);
+  if (!canManage) {
+    if (!campaignId) throw new ForbiddenError("เฉพาะผู้จัดการหรือผู้ดูแลระบบเท่านั้นที่ลบงานเดี่ยวได้");
+    await assertPlanningEditable(campaignId);
+  }
   await taskService.deleteTask(taskId, { force: canManage });
-  revalidatePath(`/campaigns/${campaignId}`);
-  revalidatePath(`/campaigns/${campaignId}/board`);
+  revalidatePath(`/tasks/${taskId}`);
+  if (campaignId) {
+    revalidatePath(`/campaigns/${campaignId}`);
+    revalidatePath(`/campaigns/${campaignId}/board`);
+  }
   revalidatePath("/my-work");
 }
 
